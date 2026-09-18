@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UNBREAKABLE</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script type="importmap">
         {
             "imports": {
@@ -16,191 +14,309 @@
             }
         }
     </script>
-    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <style>
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .checkbox-custom:checked + label .check-icon { display: block; }
+        .checkbox-custom:checked + label .text-content { text-decoration: line-through; opacity: 0.5; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 antialiased overflow-x-hidden">
-    <!-- The React root element -->
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Shield, Flame, Target, BookOpen, CheckCircle2, Circle, Trophy, Activity, BarChart, Sparkles, ChevronDown, ChevronUp, AlertTriangle, ArrowRight, Zap, Check, X, Info, Utensils, Coffee, Dumbbell, Calendar, ShoppingCart, Layers, Repeat, Clock, Timer, CheckSquare, Play, Pause, Leaf, RefreshCw, Eye } from 'lucide-react';
+        import { Target, Activity, Dumbbell, ChevronDown, Check, Eye, Layers, Repeat, Clock, Timer, Play, Pause, Utensils, ShoppingCart, RefreshCw, AlertTriangle } from 'lucide-react';
+
+        const GYM_CONFIG = {
+          daily: [
+            { weight: "0 kg / 0 lbs", sets: "1", reps: "10 Min", tempo: "Static", rest: "0s", icon: "activity", visual: "hooklying" },
+            { weight: "0 kg / 0 lbs", sets: "3", reps: "10", tempo: "2-2-2-0", rest: "60s", icon: "shield", visual: "birddog" }
+          ],
+          liftmor: [
+            { weight: "20-40kg (45-90 lbs)", sets: "5", reps: "5", tempo: "3-0-1-0", rest: "120s", icon: "dumbbell", visual: "rdl" },
+            { weight: "8-16kg (15-35 lbs)", sets: "4", reps: "8", tempo: "2-1-1-0", rest: "90s", icon: "dumbbell", visual: "squat" },
+            { weight: "4-10kg (9-22 lbs)", sets: "4", reps: "6", tempo: "2-0-1-0", rest: "120s", icon: "dumbbell", visual: "overhead" },
+            { weight: "Bodyweight", sets: "3", reps: "5 Drops", tempo: "Explosive", rest: "60s", icon: "activity", visual: "impact" }
+          ]
+        };
+
+        const DIET_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
         const TRANSLATIONS = {
           en: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Official Method", scoreLabel: "Bone Score", level: "LVL",
-              protocol: "Protocol", diet: "Diet", gym: "Gym", stats: "Progress", vault: "The Book",
+              title: "UNBREAKABLE", subtitle: "Official Method", protocol: "Protocol", diet: "Diet", gym: "Gym",
               viewSide: "Side View", viewFront: "Front View",
-              forge: { 
-                title: "Daily Protocol", completedTitle: "Protocol Completed!", completedDesc: "You sent the mechanical and nutritional signal. Your bones are rebuilding.", streak: "Streak", guideBtn: "How to Use the App (Crucible)",
-                guide: { intro: "Welcome to your 12-Week Reconstruction. Bone remodeling is slow, but cellular signaling is immediate. 84 days is the window to reverse BTMs.", s1Title: "1. The Protocol (Forge)", s1Desc: "Check off the 5 pillars daily.", s2Title: "2. The Gym (Mechanics)", s2Desc: "Master the Hip Hinge and heavy lifting safely.", s3Title: "3. The Diet (Fuel)", s3Desc: "Optimize calcium absorption with 7-day blueprints." }
-              },
-              dietUI: {
-                title: "Nutrition Blueprint", desc: "Select profile and day. Optimized for low-oxalate, highly bioavailable ingredients.", tabs: { menu: "Daily Menu", cart: "Grocery Cart" }, cartTitle: "Estimated Cart", cartDesc: "Quantities for the 7-day blueprint.", categories: { proteins: "Proteins & Dairy", produce: "Produce (Low-Oxalate)", pantry: "Pantry & Supplements" },
-                profiles: { female: "Women", male: "Men", vegan: "Vegan" }, days: { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" }, meals: { breakfast: "Breakfast", snack1: "Snack", lunch: "Lunch", snack2: "Snack", dinner: "Dinner", tea: "Herbal Tea", supplements: "Supplements" }, reset: "Reset Cart"
-              },
-              gymUI: {
-                title: "Clinical Biomechanics", desc: "Mechanical load is the only language bones understand.", tabs: { daily: "Daily Reset", liftmor: "LIFTMOR (2x/Wk)", redlines: "Red Lines" },
-                labels: { sets: "Sets", reps: "Reps", tempo: "Tempo", rest: "Rest", focus: "Focus:", breath: "Breath:", execution: "Execution Protocol:", weight: "Recommended Load:" },
-                phases: { eccentric: "Eccentric", bottom_pause: "Isometric", concentric: "Concentric", top_pause: "Top Pause", rest: "Systemic Rest", breathing: "Breathing", ready: "Ready" },
-                huds: { hiphinge: "HIP HINGE", hipsdown: "HIPS DOWN", bracecore: "BRACE CORE", noarch: "DO NOT ARCH!", heeldrop: "HEEL DROP", fracture: "FRACTURE RISK!" }
-              },
-              statsUI: { title: "Clinical Progress", btmTitle: "12-Week Reconstruction", btmDesc: "Tracking Bone Turnover Markers (CTX vs P1NP). Cross the lines." },
-              quizUI: { start: "Take Quiz", next: "Next", finish: "Finish", correct: "Correct!", incorrect: "Incorrect", explanation: "Rationale:" }
+              forge: { title: "Daily Protocol", completedDesc: "Mechanical and nutritional signal sent. Bones rebuilding.", guideBtn: "How to Use (Crucible)", s1Title: "1. Check the 5 pillars.", s2Title: "2. Load bones safely.", s3Title: "3. Fuel with low-oxalate calcium." },
+              dietUI: { title: "Nutrition Blueprint", desc: "Low-oxalate & highly bioavailable.", tabs: { menu: "Menu", cart: "Cart" }, profiles: { female: "Women", male: "Men", vegan: "Vegan" }, days: { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" }, reset: "Reset Cart" },
+              gymUI: { title: "Clinical Biomechanics", desc: "Mechanical load triggers bone growth.", tabs: { daily: "Daily Reset", liftmor: "LIFTMOR", redlines: "Red Lines" }, labels: { sets: "Sets", reps: "Reps", tempo: "Tempo", rest: "Rest", focus: "Focus:", breath: "Breath:", execution: "Execution:", weight: "Load:" }, phases: { eccentric: "Eccentric", bottom_pause: "Isometric", concentric: "Concentric", top_pause: "Pause", rest: "Rest", breathing: "Breathing", ready: "Ready" }, huds: { hiphinge: "HIP HINGE", hipsdown: "HIPS DOWN", bracecore: "BRACE CORE", noarch: "NO ARCH!", heeldrop: "HEEL DROP", fracture: "FRACTURE RISK!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Quantity Only", tbs: "TBS (3D)", arch: "Architecture" }, nutrition: { d3: "D3", abs: "Absorbs", calcium: "Calcium", k2: "K2", dir: "Directs" }, biomechanics: { flex: "Spinal Flexion", hinge: "Hip Hinge" }, btm: { ctx: "CTX (Demolition)", targetDown: "↓ Target <300", p1np: "P1NP (Construction)", targetUp: "↑ Target >45" } },
             habits: [
-              { name: "Morning: Vit D3 + K2 MK-7", category: "Orthomolecular", desc: "Absorbs and directs calcium into the bone." },
-              { name: "10-Min Floor Decompression", category: "Neuromuscular", desc: "Neutralizes spinal gravity and resets posture." },
-              { name: "LIFTMOR: Heavy Load & Hip Hinge", category: "Biomechanics", desc: "Mechanical stress to trigger Wolff's Law." },
-              { name: "Low-Oxalate & Protein Target", category: "Gut-Bone Axis", desc: "Maximizes absorption and fuels osteoblasts." },
-              { name: "Evening: Magnesium + Collagen", category: "Orthomolecular", desc: "Builds the flexible steel matrix." }
+              { name: "Vit D3 + K2 MK-7", desc: "Absorbs and directs calcium." }, { name: "10-Min Floor Decompression", desc: "Neutralizes spinal gravity." },
+              { name: "LIFTMOR / Heavy Lifting", desc: "Triggers Wolff's Law." }, { name: "Low-Oxalate & Protein", desc: "Fuels osteoblasts." }, { name: "Magnesium + Collagen", desc: "Builds flexible matrix." }
             ],
-            diet: { 
-              female: { mon: [{type: "breakfast", content: "150g Greek Yogurt with 50g blueberries, 15g pumpkin seeds, 5g Collagen."}], tue: [{type: "lunch", content: "150g Grilled Chicken, 150g mixed greens, olive oil."}] },
-              male: { mon: [{type: "breakfast", content: "3 Eggs, 100g ground turkey, 1/2 avocado."}], tue: [{type: "dinner", content: "250g Pork chop, 200g Brussels sprouts, sweet potato."}] },
-              vegan: { mon: [{type: "breakfast", content: "150g Calcium-set Tofu scramble with turmeric."}], tue: [{type: "lunch", content: "150g Lentil soup, 100g quinoa."}] }
+            gymExercises: {
+              daily: [
+                { name: "Decompression", desc: "Spinal reset.", focus: "Elongation", breath: "Diaphragmatic", steps: ["Lie on back, knees bent.", "Neutral pelvis.", "Breathe deeply."] },
+                { name: "Bird-Dog", desc: "Core anti-flexion.", focus: "Spinal Stability", breath: "Exhale on extension", steps: ["All fours.", "Brace core.", "Extend opposite arm/leg."] }
+              ],
+              liftmor: [
+                { name: "Romanian Deadlift", desc: "Posterior load.", focus: "Glute Drive", breath: "Brace, exhale up", steps: ["Hinge at hips.", "Keep spine neutral.", "Squeeze glutes."] },
+                { name: "Goblet Squat", desc: "Vertical stress.", focus: "Upright Torso", breath: "Brace, exhale up", steps: ["Hold kettlebell.", "Sit hips down.", "Drive through heels."] },
+                { name: "Overhead Press", desc: "Axial load.", focus: "Lockout", breath: "Exhale on press", steps: ["Brace core.", "Press barbell up.", "Lock elbows."] },
+                { name: "Impact Drops", desc: "Osteogenic shockwave.", focus: "Heel Strike", breath: "Sharp exhale", steps: ["Rise to toes.", "Drop on heels.", "Keep legs stiff."] }
+              ],
+              redlines: [
+                { name: "Spinal Flexion", desc: "Causes wedge fractures.", focus: "Avoid", breath: "N/A", steps: ["Never bend forward with weight."] },
+                { name: "Sit-ups", desc: "Crushes spinal discs.", focus: "Avoid", breath: "N/A", steps: ["Never perform abdominal crunches."] }
+              ]
             },
-            chapters: [
-              { id: 1, title: "The Diagnostic Revolution", subtitle: "Beyond the DXA Illusion", sections: [{ type: 'text', content: "**The DXA Illusion**: DXA counts 'bricks' but ignores 3D architecture." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "Primary limitation of DXA?", opts: ["Radiation", "Misses 3D architecture", "Too slow"], ans: 1, exp: "Measures quantity, not quality." } }
-            ]
+            dietMenu: {
+              female: {
+                mon: { b: "150g (5oz) Greek Yogurt, 15g (0.5oz) Pumpkin Seeds", l: "150g (5oz) Grilled Chicken, 150g (5oz) Kale", d: "150g (5oz) Salmon, 100g (3.5oz) Broccoli" },
+                tue: { b: "2 Eggs, 30g (1oz) Cheddar", l: "150g (5oz) Turkey, 150g (5oz) Bok Choy", d: "150g (5oz) Sardines (bone-in), Quinoa" },
+                wed: { b: "150g (5oz) Cottage Cheese", l: "150g (5oz) Chicken Salad", d: "150g (5oz) Tofu, 150g (5oz) Asparagus" },
+                thu: { b: "150g (5oz) Greek Yogurt", l: "150g (5oz) Salmon, Greens", d: "150g (5oz) Lean Beef, 100g (3.5oz) Broccoli" },
+                fri: { b: "2 Eggs", l: "150g (5oz) Turkey, Kale", d: "150g (5oz) Sardines, Bok Choy" },
+                sat: { b: "150g (5oz) Cottage Cheese", l: "150g (5oz) Chicken", d: "150g (5oz) Salmon, Asparagus" },
+                sun: { b: "150g (5oz) Greek Yogurt", l: "150g (5oz) Sardines", d: "150g (5oz) Tofu, Broccoli" }
+              },
+              male: {
+                mon: { b: "3 Eggs, 30g (1oz) Cheese", l: "200g (7oz) Chicken, 150g (5oz) Kale", d: "200g (7oz) Steak, 150g (5oz) Broccoli" },
+                tue: { b: "200g (7oz) Greek Yogurt", l: "200g (7oz) Turkey, Bok Choy", d: "200g (7oz) Salmon, Asparagus" },
+                wed: { b: "3 Eggs", l: "200g (7oz) Sardines, Quinoa", d: "200g (7oz) Pork, Greens" },
+                thu: { b: "200g (7oz) Cottage Cheese", l: "200g (7oz) Chicken, Kale", d: "200g (7oz) Steak, Broccoli" },
+                fri: { b: "3 Eggs", l: "200g (7oz) Turkey", d: "200g (7oz) Salmon, Bok Choy" },
+                sat: { b: "200g (7oz) Greek Yogurt", l: "200g (7oz) Sardines", d: "200g (7oz) Pork, Asparagus" },
+                sun: { b: "3 Eggs", l: "200g (7oz) Chicken", d: "200g (7oz) Steak, Greens" }
+              },
+              vegan: {
+                mon: { b: "200g (7oz) Calcium-Tofu Scramble", l: "150g (5oz) Lentils, 150g (5oz) Kale", d: "150g (5oz) Tempeh, 100g (3.5oz) Broccoli" },
+                tue: { b: "150g (5oz) Soy Yogurt, Pumpkin Seeds", l: "150g (5oz) Chickpeas, Bok Choy", d: "200g (7oz) Calcium-Tofu, Asparagus" },
+                wed: { b: "Protein Oatmeal", l: "150g (5oz) Seitan, Greens", d: "150g (5oz) Lentils, Quinoa" },
+                thu: { b: "200g (7oz) Calcium-Tofu", l: "150g (5oz) Tempeh, Kale", d: "150g (5oz) Chickpeas, Broccoli" },
+                fri: { b: "150g (5oz) Soy Yogurt", l: "150g (5oz) Lentils, Bok Choy", d: "200g (7oz) Calcium-Tofu, Asparagus" },
+                sat: { b: "Protein Shake", l: "150g (5oz) Seitan", d: "150g (5oz) Tempeh, Greens" },
+                sun: { b: "200g (7oz) Calcium-Tofu", l: "150g (5oz) Chickpeas", d: "150g (5oz) Lentils, Broccoli" }
+              }
+            },
+            cartItems: {
+              female: ["1kg (35oz) Greek Yogurt", "14 Eggs", "300g (10oz) Chicken", "300g (10oz) Salmon", "300g (10oz) Sardines", "500g (17oz) Kale/Bok Choy", "500g (17oz) Broccoli", "Vit D3, K2, Magnesium, Collagen"],
+              male: ["1.5kg (52oz) Greek Yogurt", "21 Eggs", "600g (21oz) Chicken", "600g (21oz) Steak", "400g (14oz) Salmon", "700g (24oz) Kale/Bok Choy", "Vit D3, K2, Magnesium, Collagen"],
+              vegan: ["1.5kg (52oz) Calcium-Tofu", "600g (21oz) Lentils", "500g (17oz) Tempeh", "500g (17oz) Chickpeas", "700g (24oz) Kale/Bok Choy", "Vegan D3, K2, Magnesium, Amino Acids"]
+            }
           },
           it: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Metodo Ufficiale", scoreLabel: "Salute Ossea", level: "LIV",
-              protocol: "Protocollo", diet: "Dieta", gym: "Gym", stats: "Progressi", vault: "Il Libro",
+              title: "UNBREAKABLE", subtitle: "Metodo Ufficiale", protocol: "Protocollo", diet: "Dieta", gym: "Gym",
               viewSide: "Vista Laterale", viewFront: "Vista Frontale",
-              forge: { 
-                title: "Protocollo Quotidiano", completedTitle: "Completato!", completedDesc: "Hai inviato il segnale meccanico e nutrizionale. Le ossa ricostruiscono.", streak: "Serie", guideBtn: "Come usare l'App",
-                guide: { intro: "Benvenuto nella Ricostruzione in 12 Settimane. 84 giorni è la finestra per invertire i BTM.", s1Title: "1. Il Protocollo", s1Desc: "Spunta i 5 pilastri ogni giorno.", s2Title: "2. La Palestra", s2Desc: "Padroneggia i carichi pesanti in sicurezza.", s3Title: "3. La Dieta", s3Desc: "Ottimizza l'assorbimento del calcio." }
-              },
-              dietUI: {
-                title: "Piano Nutrizionale", desc: "Seleziona profilo e giorno. Ingredienti ad alta biodisponibilità.", tabs: { menu: "Menu", cart: "Spesa" }, cartTitle: "Carrello Stimato", cartDesc: "Quantità basate sul piano di 7 giorni.", categories: { proteins: "Proteine & Latticini", produce: "Ortofrutta (Basso Ossalato)", pantry: "Dispensa & Integratori" },
-                profiles: { female: "Donna", male: "Uomo", vegan: "Vegano" }, days: { mon: "Lun", tue: "Mar", wed: "Mer", thu: "Gio", fri: "Ven", sat: "Sab", sun: "Dom" }, meals: { breakfast: "Colazione", snack1: "Spuntino", lunch: "Pranzo", snack2: "Spuntino", dinner: "Cena", tea: "Tisana", supplements: "Integratori" }, reset: "Azzera Lista"
-              },
-              gymUI: {
-                title: "Biomeccanica Clinica", desc: "Il carico meccanico è l'unica lingua che le ossa comprendono.", tabs: { daily: "Quotidiano", liftmor: "LIFTMOR", redlines: "Linee Rosse" },
-                labels: { sets: "Serie", reps: "Reps", tempo: "Tempo", rest: "Recupero", focus: "Focus:", breath: "Respiro:", execution: "Esecuzione:", weight: "Carico:" },
-                phases: { eccentric: "Eccentrica (Discesa)", bottom_pause: "Isometria", concentric: "Concentrica (Spinta)", top_pause: "Pausa in Alto", rest: "Recupero Sistemico", breathing: "Respirazione", ready: "Pronto" },
-                huds: { hiphinge: "HIP HINGE", hipsdown: "BACINO GIÙ", bracecore: "CORE RIGIDO", noarch: "NON INARCARE!", heeldrop: "IMPATTO TALLONI", fracture: "PERICOLO FRATTURA!" }
-              },
-              statsUI: { title: "Progressi Clinici", btmTitle: "Ricostruzione a 12 Settimane", btmDesc: "Tracciamento Marker CTX vs P1NP. Incrocia le linee." },
-              quizUI: { start: "Inizia Quiz", next: "Prossima", finish: "Termina", correct: "Esatto!", incorrect: "Sbagliato", explanation: "Motivo:" }
+              forge: { title: "Protocollo Quotidiano", completedDesc: "Segnale meccanico e nutrizionale inviato. Le ossa ricostruiscono.", guideBtn: "Come usare l'App", s1Title: "1. Spunta i 5 pilastri.", s2Title: "2. Carica in sicurezza.", s3Title: "3. Ottimizza il calcio." },
+              dietUI: { title: "Piano Nutrizionale", desc: "Basso ossalato & alta biodisponibilità.", tabs: { menu: "Menu", cart: "Spesa" }, profiles: { female: "Donna", male: "Uomo", vegan: "Vegano" }, days: { mon: "Lun", tue: "Mar", wed: "Mer", thu: "Gio", fri: "Ven", sat: "Sab", sun: "Dom" }, reset: "Azzera Lista" },
+              gymUI: { title: "Biomeccanica Clinica", desc: "Il carico innesca la crescita ossea.", tabs: { daily: "Quotidiano", liftmor: "LIFTMOR", redlines: "Linee Rosse" }, labels: { sets: "Serie", reps: "Reps", tempo: "Tempo", rest: "Recupero", focus: "Focus:", breath: "Respiro:", execution: "Esecuzione:", weight: "Carico:" }, phases: { eccentric: "Eccentrica", bottom_pause: "Isometria", concentric: "Concentrica", top_pause: "Pausa", rest: "Riposo", breathing: "Respirazione", ready: "Pronto" }, huds: { hiphinge: "HIP HINGE", hipsdown: "BACINO GIÙ", bracecore: "CORE RIGIDO", noarch: "NON CURVARE!", heeldrop: "TALLONI", fracture: "PERICOLO FRATTURA!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Solo Quantità", tbs: "TBS (3D)", arch: "Architettura" }, nutrition: { d3: "D3", abs: "Assorbe", calcium: "Calcio", k2: "K2", dir: "Dirige" }, biomechanics: { flex: "Flessione Spinale", hinge: "Hip Hinge (Neutro)" }, btm: { ctx: "CTX (Demolizione)", targetDown: "↓ Target <300", p1np: "P1NP (Costruzione)", targetUp: "↑ Target >45" } },
             habits: [
-              { name: "Mattina: Vit D3 + K2 MK-7", category: "Ortomolecolare", desc: "Assorbe e dirige il calcio nell'osso." },
-              { name: "10-Min Decompressione", category: "Neuromuscolare", desc: "Neutralizza la gravità spinale e resetta la postura." },
-              { name: "LIFTMOR: Carico & Hip Hinge", category: "Biomeccanica", desc: "Stress meccanico per innescare Wolff." },
-              { name: "Basso Ossalato & Proteine", category: "Asse Intestino", desc: "Massimizza l'assorbimento per gli osteoblasti." },
-              { name: "Sera: Magnesio + Collagene", category: "Ortomolecolare", desc: "Costruisce la matrice flessibile d'acciaio." }
+              { name: "Vit D3 + K2 MK-7", desc: "Assorbe e dirige il calcio." }, { name: "10-Min Decompressione", desc: "Neutralizza la gravità." },
+              { name: "LIFTMOR / Carichi", desc: "Innesca la Legge di Wolff." }, { name: "Basso Ossalato & Proteine", desc: "Nutre gli osteoblasti." }, { name: "Magnesio + Collagene", desc: "Matrice flessibile." }
             ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g Yogurt Greco con 50g mirtilli, 15g semi zucca."}] }, male: { mon: [{type: "breakfast", content: "3 Uova, 100g tacchino, 1/2 avocado."}] }, vegan: { mon: [{type: "breakfast", content: "150g Tofu (al calcio) strapazzato."}] } },
-            chapters: [{ id: 1, title: "Rivoluzione Diagnostica", subtitle: "Oltre la DXA", sections: [{ type: 'text', content: "**L'Illusione DXA**: La MOC ignora la struttura interna 3D." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "Limite della DXA?", opts: ["Radiazioni", "Ignora l'architettura 3D", "Lenta"], ans: 1, exp: "Misura la quantità, non la qualità 3D." } }]
+            gymExercises: {
+              daily: [
+                { name: "Decompressione", desc: "Reset spinale.", focus: "Allungamento", breath: "Diaframmatica", steps: ["Sdraiati, ginocchia piegate.", "Bacino neutro.", "Respira profondo."] },
+                { name: "Bird-Dog", desc: "Anti-flessione.", focus: "Stabilità Spinale", breath: "Espira in estensione", steps: ["A quattro zampe.", "Contrai il core.", "Estendi braccio/gamba opposti."] }
+              ],
+              liftmor: [
+                { name: "Stacco Romeno (RDL)", desc: "Carico posteriore.", focus: "Spinta Glutei", breath: "Contrai, espira su", steps: ["Fletti le anche.", "Schiena neutra.", "Strizza i glutei."] },
+                { name: "Goblet Squat", desc: "Stress verticale.", focus: "Torace Dritto", breath: "Contrai, espira su", steps: ["Tieni il kettlebell.", "Siediti all'indietro.", "Spingi dai talloni."] },
+                { name: "Overhead Press", desc: "Carico assiale.", focus: "Blocco in Alto", breath: "Espira spingendo", steps: ["Core rigido.", "Spingi il bilanciere.", "Blocca i gomiti."] },
+                { name: "Impatto (Jump Drops)", desc: "Onda d'urto.", focus: "Impatto Tallone", breath: "Espira forte", steps: ["Sali in punta.", "Cadi sui talloni.", "Gambe rigide."] }
+              ],
+              redlines: [
+                { name: "Flessione Spinale", desc: "Causa fratture a cuneo.", focus: "Evitare", breath: "N/D", steps: ["Mai curvare la schiena con carico."] },
+                { name: "Sit-up / Crunch", desc: "Schiaccia i dischi.", focus: "Evitare", breath: "N/D", steps: ["Mai fare addominali in chiusura."] }
+              ]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g Yogurt Greco, 15g Semi Zucca", l: "150g Pollo, 150g Cavolo Nero", d: "150g Salmone, 100g Broccoli" }, tue: { b: "2 Uova, 30g Grana", l: "150g Tacchino, 150g Bok Choy", d: "150g Sardine, Quinoa" }, wed: { b: "150g Fiocchi di Latte", l: "150g Insalata di Pollo", d: "150g Tofu, 150g Asparagi" }, thu: { b: "150g Yogurt Greco", l: "150g Salmone, Verdure", d: "150g Manzo, 100g Broccoli" }, fri: { b: "2 Uova", l: "150g Tacchino, Cavolo", d: "150g Sardine, Bok Choy" }, sat: { b: "150g Fiocchi", l: "150g Pollo", d: "150g Salmone, Asparagi" }, sun: { b: "150g Yogurt", l: "150g Sardine", d: "150g Tofu, Broccoli" } },
+              male: { mon: { b: "3 Uova, 30g Grana", l: "200g Pollo, 150g Cavolo Nero", d: "200g Bistecca, 150g Broccoli" }, tue: { b: "200g Yogurt Greco", l: "200g Tacchino, Bok Choy", d: "200g Salmone, Asparagi" }, wed: { b: "3 Uova", l: "200g Sardine, Quinoa", d: "200g Maiale, Verdure" }, thu: { b: "200g Fiocchi", l: "200g Pollo, Cavolo", d: "200g Bistecca, Broccoli" }, fri: { b: "3 Uova", l: "200g Tacchino", d: "200g Salmone, Bok Choy" }, sat: { b: "200g Yogurt", l: "200g Sardine", d: "200g Maiale, Asparagi" }, sun: { b: "3 Uova", l: "200g Pollo", d: "200g Bistecca, Verdure" } },
+              vegan: { mon: { b: "200g Tofu al Calcio strapazzato", l: "150g Lenticchie, 150g Cavolo Nero", d: "150g Tempeh, 100g Broccoli" }, tue: { b: "150g Yogurt Soia, Semi", l: "150g Ceci, Bok Choy", d: "200g Tofu, Asparagi" }, wed: { b: "Porridge Proteico", l: "150g Seitan, Verdure", d: "150g Lenticchie, Quinoa" }, thu: { b: "200g Tofu", l: "150g Tempeh, Cavolo", d: "150g Ceci, Broccoli" }, fri: { b: "150g Yogurt Soia", l: "150g Lenticchie", d: "200g Tofu, Asparagi" }, sat: { b: "Shake Proteico", l: "150g Seitan", d: "150g Tempeh, Verdure" }, sun: { b: "200g Tofu", l: "150g Ceci", d: "150g Lenticchie, Broccoli" } }
+            },
+            cartItems: {
+              female: ["1kg Yogurt Greco", "14 Uova", "300g Pollo", "300g Salmone", "300g Sardine (con lisca)", "500g Cavolo Nero/Bok Choy", "500g Broccoli", "Vit D3, K2, Magnesio, Collagene"],
+              male: ["1.5kg Yogurt Greco", "21 Uova", "600g Pollo", "600g Bistecca", "400g Salmone", "700g Cavolo Nero/Bok Choy", "Vit D3, K2, Magnesio, Collagene"],
+              vegan: ["1.5kg Tofu (Set al Calcio)", "600g Lenticchie", "500g Tempeh", "500g Ceci", "700g Cavolo Nero/Bok Choy", "Vegan D3, K2, Magnesio, Aminoacidi"]
+            }
           },
           fr: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Méthode Officielle", scoreLabel: "Score Osseux", level: "NIV", protocol: "Protocole", diet: "Diète", gym: "Gym", stats: "Progrès", vault: "Le Livre", viewSide: "Vue Latérale", viewFront: "Vue Frontale",
-              forge: { title: "Protocole Quotidien", completedTitle: "Terminé!", completedDesc: "Signal mécanique et nutritionnel envoyé.", streak: "Série", guideBtn: "Guide d'utilisation", guide: { intro: "Fenêtre de 84 jours.", s1Title: "1. Protocole", s1Desc: "Valider les 5 piliers.", s2Title: "2. Gym", s2Desc: "Maîtriser les charges.", s3Title: "3. Diète", s3Desc: "Optimiser l'absorption." } },
-              dietUI: { title: "Plan Nutritionnel", desc: "Ingrédients hautement biodisponibles.", tabs: { menu: "Menu", cart: "Achats" }, cartTitle: "Panier Estimé", cartDesc: "Quantités pour 7 jours.", categories: { proteins: "Protéines", produce: "Légumes", pantry: "Compléments" }, profiles: { female: "Femme", male: "Homme", vegan: "Vegan" }, days: { mon: "Lun", tue: "Mar", wed: "Mer", thu: "Jeu", fri: "Ven", sat: "Sam", sun: "Dim" }, meals: { breakfast: "Petit Dèj", snack1: "Collation", lunch: "Déjeuner", snack2: "Goûter", dinner: "Dîner", tea: "Tisane", supplements: "Compléments" }, reset: "Réinitialiser" },
-              gymUI: { title: "Biomécanique", desc: "La charge mécanique est le seul langage des os.", tabs: { daily: "Quotidien", liftmor: "LIFTMOR", redlines: "Lignes Rouges" }, labels: { sets: "Séries", reps: "Rép", tempo: "Tempo", rest: "Repos", focus: "Cible:", breath: "Respir:", execution: "Exécution:", weight: "Poids:" }, phases: { eccentric: "Excentrique", bottom_pause: "Isométrique", concentric: "Concentrique", top_pause: "Pause", rest: "Repos", breathing: "Respiration", ready: "Prêt" }, huds: { hiphinge: "HIP HINGE", hipsdown: "BASSIN BAS", bracecore: "GAINAGE", noarch: "NE PAS CAMBRER", heeldrop: "CHOC TALON", fracture: "DANGER!" } },
-              statsUI: { title: "Progrès Clinique", btmTitle: "Reconstruction (12 Sem)", btmDesc: "CTX vs P1NP." }, quizUI: { start: "Démarrer Quiz", next: "Suivant", finish: "Terminer", correct: "Correct!", incorrect: "Faux", explanation: "Raison:" }
+              title: "UNBREAKABLE", subtitle: "Méthode Officielle", protocol: "Protocole", diet: "Diète", gym: "Gym",
+              viewSide: "Vue Latérale", viewFront: "Vue Frontale",
+              forge: { title: "Protocole Quotidien", completedDesc: "Signal mécanique et nutritionnel envoyé. Os en reconstruction.", guideBtn: "Guide d'utilisation", s1Title: "1. Valider les 5 piliers.", s2Title: "2. Charger en sécurité.", s3Title: "3. Optimiser le calcium." },
+              dietUI: { title: "Plan Nutritionnel", desc: "Faible oxalate & haute biodisponibilité.", tabs: { menu: "Menu", cart: "Achats" }, profiles: { female: "Femme", male: "Homme", vegan: "Vegan" }, days: { mon: "Lun", tue: "Mar", wed: "Mer", thu: "Jeu", fri: "Ven", sat: "Sam", sun: "Dim" }, reset: "Réinitialiser" },
+              gymUI: { title: "Biomécanique Clinique", desc: "La charge déclenche la croissance.", tabs: { daily: "Quotidien", liftmor: "LIFTMOR", redlines: "Lignes Rouges" }, labels: { sets: "Séries", reps: "Rép", tempo: "Tempo", rest: "Repos", focus: "Focus:", breath: "Respir:", execution: "Exécution:", weight: "Poids:" }, phases: { eccentric: "Excentrique", bottom_pause: "Isométrique", concentric: "Concentrique", top_pause: "Pause", rest: "Repos", breathing: "Respiration", ready: "Prêt" }, huds: { hiphinge: "HIP HINGE", hipsdown: "BASSIN BAS", bracecore: "GAINAGE", noarch: "NE PAS CAMBRER!", heeldrop: "TALONS", fracture: "DANGER FRACTURE!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Quantité", tbs: "TBS (3D)", arch: "Architecture" }, nutrition: { d3: "D3", abs: "Absorbe", calcium: "Calcium", k2: "K2", dir: "Dirige" }, biomechanics: { flex: "Flexion Spinale", hinge: "Hip Hinge (Neutre)" }, btm: { ctx: "CTX (Destruction)", targetDown: "↓ Cible <300", p1np: "P1NP (Construction)", targetUp: "↑ Cible >45" } },
-            habits: [ { name: "Matin: Vit D3 + K2", category: "Orthomoléculaire", desc: "Absorbe et dirige le calcium." }, { name: "10-Min Décompression", category: "Neuromusculaire", desc: "Neutralise la gravité." }, { name: "LIFTMOR", category: "Biomécanique", desc: "Stress mécanique (Loi de Wolff)." }, { name: "Faible Oxalate & Protéines", category: "Axe Intestin", desc: "Maximise l'absorption." }, { name: "Soir: Magnésium + Collagène", category: "Orthomoléculaire", desc: "Matrice flexible." } ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g Yaourt Grec."}] }, male: { mon: [{type: "breakfast", content: "3 Oeufs, dinde."}] }, vegan: { mon: [{type: "breakfast", content: "150g Tofu brouillé."}] } },
-            chapters: [{ id: 1, title: "Révolution Diagnostique", subtitle: "Au-delà de la DXA", sections: [{ type: 'text', content: "La DXA ignore l'architecture 3D." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "Limite de la DXA?", opts: ["Radiations", "Ignore l'architecture 3D", "Lente"], ans: 1, exp: "Mesure la quantité." } }]
+            habits: [
+              { name: "Vit D3 + K2 MK-7", desc: "Absorbe et dirige le calcium." }, { name: "10-Min Décompression", desc: "Neutralise la gravité." },
+              { name: "LIFTMOR / Charges", desc: "Loi de Wolff." }, { name: "Faible Oxalate & Protéines", desc: "Nourrit les ostéoblastes." }, { name: "Magnésium + Collagène", desc: "Matrice flexible." }
+            ],
+            gymExercises: {
+              daily: [{ name: "Décompression", desc: "Reset spinal.", focus: "Élongation", breath: "Diaphragmatique", steps: ["Allongé, genoux pliés.", "Bassin neutre.", "Respirer."] }, { name: "Bird-Dog", desc: "Anti-flexion.", focus: "Stabilité", breath: "Expirer", steps: ["À quatre pattes.", "Gainer.", "Tendre bras/jambe."] }],
+              liftmor: [{ name: "Soulevé de terre (RDL)", desc: "Charge postérieure.", focus: "Fessiers", breath: "Gainer, expirer", steps: ["Fléchir hanches.", "Dos neutre.", "Serrer fessiers."] }, { name: "Goblet Squat", desc: "Stress vertical.", focus: "Torse droit", breath: "Gainer, expirer", steps: ["Tenir poids.", "S'asseoir.", "Pousser talons."] }, { name: "Overhead Press", desc: "Charge axiale.", focus: "Verrouillage", breath: "Expirer", steps: ["Gainer.", "Pousser barre.", "Verrouiller coudes."] }, { name: "Impacts", desc: "Onde de choc.", focus: "Talon", breath: "Expirer fort", steps: ["Sur pointes.", "Tomber sur talons.", "Jambes raides."] }],
+              redlines: [{ name: "Flexion Spinale", desc: "Fractures cunéiformes.", focus: "Éviter", breath: "N/A", steps: ["Ne jamais courber le dos avec charge."] }, { name: "Sit-up", desc: "Écrase les disques.", focus: "Éviter", breath: "N/A", steps: ["Ne jamais faire d'abdominaux classiques."] }]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g Yaourt Grec, Graines", l: "150g Poulet, Chou Frisé", d: "150g Saumon, Brocoli" }, tue: { b: "2 Oeufs, Fromage", l: "150g Dinde, Bok Choy", d: "150g Sardines, Quinoa" }, wed: { b: "150g Fromage Blanc", l: "150g Salade Poulet", d: "150g Tofu, Asperges" }, thu: { b: "150g Yaourt Grec", l: "150g Saumon, Légumes", d: "150g Boeuf, Brocoli" }, fri: { b: "2 Oeufs", l: "150g Dinde, Chou", d: "150g Sardines, Bok Choy" }, sat: { b: "150g Fromage", l: "150g Poulet", d: "150g Saumon, Asperges" }, sun: { b: "150g Yaourt", l: "150g Sardines", d: "150g Tofu, Brocoli" } },
+              male: { mon: { b: "3 Oeufs, Fromage", l: "200g Poulet, Chou Frisé", d: "200g Steak, Brocoli" }, tue: { b: "200g Yaourt Grec", l: "200g Dinde, Bok Choy", d: "200g Saumon, Asperges" }, wed: { b: "3 Oeufs", l: "200g Sardines, Quinoa", d: "200g Porc, Légumes" }, thu: { b: "200g Fromage Blanc", l: "200g Poulet", d: "200g Steak, Brocoli" }, fri: { b: "3 Oeufs", l: "200g Dinde", d: "200g Saumon, Bok Choy" }, sat: { b: "200g Yaourt", l: "200g Sardines", d: "200g Porc, Asperges" }, sun: { b: "3 Oeufs", l: "200g Poulet", d: "200g Steak, Légumes" } },
+              vegan: { mon: { b: "200g Tofu brouillé", l: "150g Lentilles, Chou", d: "150g Tempeh, Brocoli" }, tue: { b: "150g Yaourt Soja, Graines", l: "150g Pois chiches", d: "200g Tofu, Asperges" }, wed: { b: "Flocons d'avoine", l: "150g Seitan", d: "150g Lentilles, Quinoa" }, thu: { b: "200g Tofu", l: "150g Tempeh", d: "150g Pois chiches, Brocoli" }, fri: { b: "150g Yaourt Soja", l: "150g Lentilles", d: "200g Tofu, Asperges" }, sat: { b: "Shake Protéiné", l: "150g Seitan", d: "150g Tempeh" }, sun: { b: "200g Tofu", l: "150g Pois chiches", d: "150g Lentilles, Brocoli" } }
+            },
+            cartItems: {
+              female: ["1kg Yaourt Grec", "14 Oeufs", "300g Poulet", "300g Saumon", "300g Sardines", "500g Chou Frisé/Bok Choy", "500g Brocoli", "Vit D3, K2, Magnésium, Collagène"],
+              male: ["1.5kg Yaourt Grec", "21 Oeufs", "600g Poulet", "600g Steak", "400g Saumon", "700g Chou", "Vit D3, K2, Magnésium, Collagène"],
+              vegan: ["1.5kg Tofu (Calcium)", "600g Lentilles", "500g Tempeh", "500g Pois chiches", "700g Chou", "Vegan D3, K2, Magnésium, Acides Aminés"]
+            }
           },
           de: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Offizielle Methode", scoreLabel: "Knochen-Score", level: "LVL", protocol: "Protokoll", diet: "Ernährung", gym: "Fitness", stats: "Fortschritt", vault: "Das Buch", viewSide: "Seitenansicht", viewFront: "Frontansicht",
-              forge: { title: "Tägliches Protokoll", completedTitle: "Abgeschlossen!", completedDesc: "Mechanisches Signal gesendet.", streak: "Serie", guideBtn: "Wie man die App benutzt", guide: { intro: "84-Tage-Fenster.", s1Title: "1. Protokoll", s1Desc: "5 Säulen.", s2Title: "2. Fitness", s2Desc: "Schwere Lasten.", s3Title: "3. Ernährung", s3Desc: "Kalzium optimieren." } },
-              dietUI: { title: "Ernährungsplan", desc: "Zutaten mit hoher Bioverfügbarkeit.", tabs: { menu: "Menü", cart: "Einkauf" }, cartTitle: "Warenkorb", cartDesc: "Mengen für 7 Tage.", categories: { proteins: "Proteine", produce: "Gemüse", pantry: "Ergänzungen" }, profiles: { female: "Frauen", male: "Männer", vegan: "Vegan" }, days: { mon: "Mo", tue: "Di", wed: "Mi", thu: "Do", fri: "Fr", sat: "Sa", sun: "So" }, meals: { breakfast: "Frühstück", snack1: "Snack", lunch: "Mittagessen", snack2: "Snack", dinner: "Abendessen", tea: "Tee", supplements: "Ergänzungen" }, reset: "Zurücksetzen" },
-              gymUI: { title: "Biomechanik", desc: "Mechanische Belastung ist die Sprache der Knochen.", tabs: { daily: "Täglich", liftmor: "LIFTMOR", redlines: "Rote Linien" }, labels: { sets: "Sätze", reps: "Wdh", tempo: "Tempo", rest: "Pause", focus: "Fokus:", breath: "Atmung:", execution: "Ausführung:", weight: "Gewicht:" }, phases: { eccentric: "Exzentrisch", bottom_pause: "Isometrisch", concentric: "Konzentrisch", top_pause: "Pause", rest: "Systemische Pause", breathing: "Atmung", ready: "Bereit" }, huds: { hiphinge: "HÜFTBEUGUNG", hipsdown: "HÜFTE TIEF", bracecore: "CORE ANSPANNEN", noarch: "NICHT KRÜMMEN", heeldrop: "FERSEN AUFPRALL", fracture: "BRUCHGEFAHR!" } },
-              statsUI: { title: "Klinischer Fortschritt", btmTitle: "12-Wochen-Rekonstruktion", btmDesc: "CTX vs P1NP." }, quizUI: { start: "Quiz starten", next: "Weiter", finish: "Beenden", correct: "Richtig!", incorrect: "Falsch", explanation: "Grund:" }
+              title: "UNBREAKABLE", subtitle: "Offizielle Methode", protocol: "Protokoll", diet: "Ernährung", gym: "Fitness",
+              viewSide: "Seitenansicht", viewFront: "Frontansicht",
+              forge: { title: "Tägliches Protokoll", completedDesc: "Mechanisches Signal gesendet. Knochen bauen auf.", guideBtn: "Wie man die App nutzt", s1Title: "1. 5 Säulen prüfen.", s2Title: "2. Sicher belasten.", s3Title: "3. Kalzium optimieren." },
+              dietUI: { title: "Ernährungsplan", desc: "Wenig Oxalat & hohe Bioverfügbarkeit.", tabs: { menu: "Menü", cart: "Einkauf" }, profiles: { female: "Frauen", male: "Männer", vegan: "Vegan" }, days: { mon: "Mo", tue: "Di", wed: "Mi", thu: "Do", fri: "Fr", sat: "Sa", sun: "So" }, reset: "Zurücksetzen" },
+              gymUI: { title: "Biomechanik", desc: "Mechanische Belastung baut Knochen auf.", tabs: { daily: "Täglich", liftmor: "LIFTMOR", redlines: "Rote Linien" }, labels: { sets: "Sätze", reps: "Wdh", tempo: "Tempo", rest: "Pause", focus: "Fokus:", breath: "Atmung:", execution: "Ausführung:", weight: "Gewicht:" }, phases: { eccentric: "Exzentrisch", bottom_pause: "Isometrisch", concentric: "Konzentrisch", top_pause: "Pause", rest: "Pause", breathing: "Atmung", ready: "Bereit" }, huds: { hiphinge: "HÜFTBEUGUNG", hipsdown: "HÜFTE TIEF", bracecore: "CORE ANSPANNEN", noarch: "NICHT KRÜMMEN!", heeldrop: "FERSEN", fracture: "BRUCHGEFAHR!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Nur Menge", tbs: "TBS (3D)", arch: "Architektur" }, nutrition: { d3: "D3", abs: "Absorbiert", calcium: "Kalzium", k2: "K2", dir: "Leitet" }, biomechanics: { flex: "Wirbelsäulenbeugung", hinge: "Hip Hinge (Neutral)" }, btm: { ctx: "CTX (Abbau)", targetDown: "↓ Ziel <300", p1np: "P1NP (Aufbau)", targetUp: "↑ Ziel >45" } },
-            habits: [ { name: "Morgen: Vit D3 + K2", category: "Orthomolekular", desc: "Absorbiert und leitet Kalzium." }, { name: "10-Min Dekompression", category: "Neuromuskulär", desc: "Neutralisiert die Schwerkraft." }, { name: "LIFTMOR", category: "Biomechanik", desc: "Mechanischer Stress (Wolff-Gesetz)." }, { name: "Wenig Oxalat & Protein", category: "Darm-Achse", desc: "Maximiert die Absorption." }, { name: "Abend: Magnesium + Kollagen", category: "Orthomolekular", desc: "Flexible Matrix." } ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g Griechischer Joghurt."}] }, male: { mon: [{type: "breakfast", content: "3 Eier."}] }, vegan: { mon: [{type: "breakfast", content: "150g Tofu."}] } },
-            chapters: [{ id: 1, title: "Diagnostische Revolution", subtitle: "Jenseits von DXA", sections: [{ type: 'text', content: "DXA ignoriert die 3D-Architektur." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "Limit von DXA?", opts: ["Strahlung", "Ignoriert 3D-Architektur", "Langsam"], ans: 1, exp: "Misst Menge, nicht Qualität." } }]
+            habits: [
+              { name: "Vit D3 + K2 MK-7", desc: "Absorbiert und leitet Kalzium." }, { name: "10-Min Dekompression", desc: "Neutralisiert Schwerkraft." },
+              { name: "LIFTMOR / Schwere Last", desc: "Wolff-Gesetz." }, { name: "Wenig Oxalat & Protein", desc: "Nährt Osteoblasten." }, { name: "Magnesium + Kollagen", desc: "Flexible Matrix." }
+            ],
+            gymExercises: {
+              daily: [{ name: "Dekompression", desc: "Spinaler Reset.", focus: "Verlängerung", breath: "Zwerchfell", steps: ["Auf Rücken liegen, Knie beugen.", "Becken neutral.", "Tief atmen."] }, { name: "Bird-Dog", desc: "Anti-Flexion.", focus: "Stabilität", breath: "Ausatmen", steps: ["Vierfüßlerstand.", "Core anspannen.", "Arm/Bein strecken."] }],
+              liftmor: [{ name: "Kreuzheben (RDL)", desc: "Hintere Kette.", focus: "Gesäß", breath: "Anspannen, ausatmen", steps: ["Hüfte beugen.", "Rücken neutral.", "Gesäß anspannen."] }, { name: "Goblet Squat", desc: "Vertikaler Stress.", focus: "Oberkörper gerade", breath: "Anspannen, ausatmen", steps: ["Gewicht halten.", "Nach hinten setzen.", "Fersen drücken."] }, { name: "Overhead Press", desc: "Axiale Last.", focus: "Lockout", breath: "Ausatmen", steps: ["Core anspannen.", "Hantel hochdrücken.", "Ellbogen strecken."] }, { name: "Impacts", desc: "Schockwelle.", focus: "Fersenaufprall", breath: "Scharf ausatmen", steps: ["Auf Zehenspitzen.", "Auf Fersen fallen.", "Beine steif."] }],
+              redlines: [{ name: "Spinale Flexion", desc: "Keilbrüche.", focus: "Vermeiden", breath: "N/A", steps: ["Niemals Rücken mit Gewicht krümmen."] }, { name: "Sit-ups", desc: "Zerstört Bandscheiben.", focus: "Vermeiden", breath: "N/A", steps: ["Niemals Crunches machen."] }]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g Griechischer Joghurt, Kerne", l: "150g Huhn, Grünkohl", d: "150g Lachs, Brokkoli" }, tue: { b: "2 Eier, Käse", l: "150g Pute, Bok Choy", d: "150g Sardinen, Quinoa" }, wed: { b: "150g Hüttenkäse", l: "150g Hühnersalat", d: "150g Tofu, Spargel" }, thu: { b: "150g Joghurt", l: "150g Lachs, Gemüse", d: "150g Rind, Brokkoli" }, fri: { b: "2 Eier", l: "150g Pute", d: "150g Sardinen, Bok Choy" }, sat: { b: "150g Hüttenkäse", l: "150g Huhn", d: "150g Lachs, Spargel" }, sun: { b: "150g Joghurt", l: "150g Sardinen", d: "150g Tofu, Brokkoli" } },
+              male: { mon: { b: "3 Eier, Käse", l: "200g Huhn, Grünkohl", d: "200g Steak, Brokkoli" }, tue: { b: "200g Joghurt", l: "200g Pute, Bok Choy", d: "200g Lachs, Spargel" }, wed: { b: "3 Eier", l: "200g Sardines, Quinoa", d: "200g Schwein, Gemüse" }, thu: { b: "200g Hüttenkäse", l: "200g Huhn", d: "200g Steak, Brokkoli" }, fri: { b: "3 Eier", l: "200g Pute", d: "200g Lachs, Bok Choy" }, sat: { b: "200g Joghurt", l: "200g Sardinen", d: "200g Schwein, Spargel" }, sun: { b: "3 Eier", l: "200g Huhn", d: "200g Steak, Gemüse" } },
+              vegan: { mon: { b: "200g Tofu-Rührei", l: "150g Linsen, Grünkohl", d: "150g Tempeh, Brokkoli" }, tue: { b: "150g Sojajoghurt, Kerne", l: "150g Kichererbsen", d: "200g Tofu, Spargel" }, wed: { b: "Haferflocken", l: "150g Seitan", d: "150g Linsen, Quinoa" }, thu: { b: "200g Tofu", l: "150g Tempeh", d: "150g Kichererbsen, Brokkoli" }, fri: { b: "150g Sojajoghurt", l: "150g Linsen", d: "200g Tofu, Spargel" }, sat: { b: "Protein Shake", l: "150g Seitan", d: "150g Tempeh" }, sun: { b: "200g Tofu", l: "150g Kichererbsen", d: "150g Linsen, Brokkoli" } }
+            },
+            cartItems: {
+              female: ["1kg Griechischer Joghurt", "14 Eier", "300g Huhn", "300g Lachs", "300g Sardinen", "500g Grünkohl/Bok Choy", "500g Brokkoli", "Vit D3, K2, Magnesium, Kollagen"],
+              male: ["1.5kg Joghurt", "21 Eier", "600g Huhn", "600g Steak", "400g Lachs", "700g Grünkohl", "Vit D3, K2, Magnesium, Kollagen"],
+              vegan: ["1.5kg Calcium-Tofu", "600g Linsen", "500g Tempeh", "500g Kichererbsen", "700g Grünkohl", "Vegan D3, K2, Magnesium, Aminosäuren"]
+            }
           },
           es: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Método Oficial", scoreLabel: "Puntuación Ósea", level: "NIV", protocol: "Protocolo", diet: "Dieta", gym: "Gimnasio", stats: "Progreso", vault: "El Libro", viewSide: "Vista Lateral", viewFront: "Vista Frontal",
-              forge: { title: "Protocolo Diario", completedTitle: "¡Completado!", completedDesc: "Señal mecánica enviada. Los huesos se reconstruyen.", streak: "Racha", guideBtn: "Cómo usar la App", guide: { intro: "Ventana de 84 días para revertir BTMs.", s1Title: "1. El Protocolo", s1Desc: "Marca los 5 pilares.", s2Title: "2. Gimnasio", s2Desc: "Domina las cargas.", s3Title: "3. Dieta", s3Desc: "Optimiza la absorción." } },
-              dietUI: { title: "Plan Nutricional", desc: "Ingredientes de alta biodisponibilidad.", tabs: { menu: "Menú", cart: "Compras" }, cartTitle: "Carrito Estimado", cartDesc: "Cantidades para 7 días.", categories: { proteins: "Proteínas", produce: "Verduras", pantry: "Suplementos" }, profiles: { female: "Mujer", male: "Hombre", vegan: "Vegano" }, days: { mon: "Lun", tue: "Mar", wed: "Mié", thu: "Jue", fri: "Vie", sat: "Sáb", sun: "Dom" }, meals: { breakfast: "Desayuno", snack1: "Snack", lunch: "Almuerzo", snack2: "Snack", dinner: "Cena", tea: "Infusión", supplements: "Suplementos" }, reset: "Restablecer" },
-              gymUI: { title: "Biomecánica", desc: "La carga mecánica es el idioma de los huesos.", tabs: { daily: "Diario", liftmor: "LIFTMOR", redlines: "Líneas Rojas" }, labels: { sets: "Series", reps: "Reps", tempo: "Tempo", rest: "Descanso", focus: "Foco:", breath: "Respir:", execution: "Ejecución:", weight: "Peso:" }, phases: { eccentric: "Excéntrica", bottom_pause: "Isométrica", concentric: "Concéntrica", top_pause: "Pausa", rest: "Descanso", breathing: "Respiración", ready: "Listo" }, huds: { hiphinge: "BISAGRA DE CADERA", hipsdown: "CADERA ABAJO", bracecore: "CORE RÍGIDO", noarch: "¡NO ARQUEAR!", heeldrop: "IMPACTO TALÓN", fracture: "¡PELIGRO!" } },
-              statsUI: { title: "Progreso Clínico", btmTitle: "Reconstrucción (12 Sem)", btmDesc: "CTX vs P1NP." }, quizUI: { start: "Iniciar Quiz", next: "Siguiente", finish: "Terminar", correct: "¡Correcto!", incorrect: "Incorrecto", explanation: "Razón:" }
+              title: "UNBREAKABLE", subtitle: "Método Oficial", protocol: "Protocolo", diet: "Dieta", gym: "Gimnasio",
+              viewSide: "Vista Lateral", viewFront: "Vista Frontal",
+              forge: { title: "Protocolo Diario", completedDesc: "Señal mecánica y nutricional enviada. Huesos reconstruyéndose.", guideBtn: "Cómo usar la App", s1Title: "1. Marca los 5 pilares.", s2Title: "2. Carga segura.", s3Title: "3. Optimiza el calcio." },
+              dietUI: { title: "Plan Nutricional", desc: "Bajo oxalato & alta biodisponibilidad.", tabs: { menu: "Menú", cart: "Compras" }, profiles: { female: "Mujer", male: "Hombre", vegan: "Vegano" }, days: { mon: "Lun", tue: "Mar", wed: "Mié", thu: "Jue", fri: "Vie", sat: "Sáb", sun: "Dom" }, reset: "Restablecer" },
+              gymUI: { title: "Biomecánica", desc: "La carga mecánica desencadena el crecimiento.", tabs: { daily: "Diario", liftmor: "LIFTMOR", redlines: "Líneas Rojas" }, labels: { sets: "Series", reps: "Reps", tempo: "Tempo", rest: "Descanso", focus: "Foco:", breath: "Respir:", execution: "Ejecución:", weight: "Peso:" }, phases: { eccentric: "Excéntrica", bottom_pause: "Isométrica", concentric: "Concéntrica", top_pause: "Pausa", rest: "Descanso", breathing: "Respiración", ready: "Listo" }, huds: { hiphinge: "BISAGRA CADERA", hipsdown: "CADERA ABAJO", bracecore: "CORE RÍGIDO", noarch: "¡NO ARQUEAR!", heeldrop: "TALÓN", fracture: "¡PELIGRO FRACTURA!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Solo Cantidad", tbs: "TBS (3D)", arch: "Arquitectura" }, nutrition: { d3: "D3", abs: "Absorbe", calcium: "Calcio", k2: "K2", dir: "Dirige" }, biomechanics: { flex: "Flexión Espinal", hinge: "Bisagra de Cadera" }, btm: { ctx: "CTX (Demolición)", targetDown: "↓ Meta <300", p1np: "P1NP (Construcción)", targetUp: "↑ Meta >45" } },
-            habits: [ { name: "Mañana: Vit D3 + K2", category: "Ortomolecular", desc: "Absorbe y dirige el calcio." }, { name: "10-Min Descompresión", category: "Neuromuscular", desc: "Neutraliza la gravedad." }, { name: "LIFTMOR", category: "Biomecánica", desc: "Estrés mecánico (Ley de Wolff)." }, { name: "Bajo Oxalato & Proteínas", category: "Eje Intestinal", desc: "Maximiza la absorción." }, { name: "Noche: Magnesio + Colágeno", category: "Ortomolecular", desc: "Matriz flexible." } ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g Yogur Griego."}] }, male: { mon: [{type: "breakfast", content: "3 Huevos."}] }, vegan: { mon: [{type: "breakfast", content: "150g Tofu."}] } },
-            chapters: [{ id: 1, title: "Revolución Diagnóstica", subtitle: "Más allá del DXA", sections: [{ type: 'text', content: "El DXA ignora la arquitectura 3D." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "¿Límite del DXA?", opts: ["Radiación", "Ignora la arquitectura 3D", "Lento"], ans: 1, exp: "Mide cantidad, no calidad." } }]
+            habits: [
+              { name: "Vit D3 + K2 MK-7", desc: "Absorbe y dirige el calcio." }, { name: "10-Min Descompresión", desc: "Neutraliza la gravedad." },
+              { name: "LIFTMOR / Cargas", desc: "Ley de Wolff." }, { name: "Bajo Oxalato & Proteínas", desc: "Nutre los osteoblastos." }, { name: "Magnesio + Colágeno", desc: "Matriz flexible." }
+            ],
+            gymExercises: {
+              daily: [{ name: "Descompresión", desc: "Reset espinal.", focus: "Elongación", breath: "Diafragmática", steps: ["Tumbado, rodillas dobladas.", "Pelvis neutra.", "Respirar."] }, { name: "Bird-Dog", desc: "Anti-flexión.", focus: "Estabilidad", breath: "Exhalar", steps: ["A gatas.", "Apretar core.", "Extender brazo/pierna."] }],
+              liftmor: [{ name: "Peso Muerto (RDL)", desc: "Carga posterior.", focus: "Glúteos", breath: "Apretar, exhalar", steps: ["Doblar caderas.", "Espalda neutra.", "Apretar glúteos."] }, { name: "Goblet Squat", desc: "Estrés vertical.", focus: "Torso recto", breath: "Apretar, exhalar", steps: ["Sostener peso.", "Sentarse atrás.", "Empujar talones."] }, { name: "Overhead Press", desc: "Carga axial.", focus: "Bloqueo", breath: "Exhalar", steps: ["Apretar core.", "Empujar barra.", "Bloquear codos."] }, { name: "Impactos", desc: "Onda de choque.", focus: "Talón", breath: "Exhalar fuerte", steps: ["De puntillas.", "Caer sobre talones.", "Piernas rígidas."] }],
+              redlines: [{ name: "Flexión Espinal", desc: "Fracturas en cuña.", focus: "Evitar", breath: "N/A", steps: ["Nunca curvar la espalda con carga."] }, { name: "Sit-ups", desc: "Aplasta los discos.", focus: "Evitar", breath: "N/A", steps: ["Nunca hacer abdominales clásicos."] }]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g Yogur Griego, Semillas", l: "150g Pollo, Kale", d: "150g Salmón, Brócoli" }, tue: { b: "2 Huevos, Queso", l: "150g Pavo, Bok Choy", d: "150g Sardinas, Quinoa" }, wed: { b: "150g Requesón", l: "150g Ensalada Pollo", d: "150g Tofu, Espárragos" }, thu: { b: "150g Yogur Griego", l: "150g Salmón, Verduras", d: "150g Ternera, Brócoli" }, fri: { b: "2 Huevos", l: "150g Pavo", d: "150g Sardinas, Bok Choy" }, sat: { b: "150g Requesón", l: "150g Pollo", d: "150g Salmón, Espárragos" }, sun: { b: "150g Yogur", l: "150g Sardinas", d: "150g Tofu, Brócoli" } },
+              male: { mon: { b: "3 Huevos, Queso", l: "200g Pollo, Kale", d: "200g Filete, Brócoli" }, tue: { b: "200g Yogur Griego", l: "200g Pavo, Bok Choy", d: "200g Salmón, Espárragos" }, wed: { b: "3 Huevos", l: "200g Sardinas, Quinoa", d: "200g Cerdo, Verduras" }, thu: { b: "200g Requesón", l: "200g Pollo", d: "200g Filete, Brócoli" }, fri: { b: "3 Huevos", l: "200g Pavo", d: "200g Salmón, Bok Choy" }, sat: { b: "200g Yogur", l: "200g Sardinas", d: "200g Cerdo, Espárragos" }, sun: { b: "3 Huevos", l: "200g Pollo", d: "200g Filete, Verduras" } },
+              vegan: { mon: { b: "200g Tofu revuelto", l: "150g Lentejas, Kale", d: "150g Tempeh, Brócoli" }, tue: { b: "150g Yogur Soja, Semillas", l: "150g Garbanzos", d: "200g Tofu, Espárragos" }, wed: { b: "Avena", l: "150g Seitan", d: "150g Lentejas, Quinoa" }, thu: { b: "200g Tofu", l: "150g Tempeh", d: "150g Garbanzos, Brócoli" }, fri: { b: "150g Yogur Soja", l: "150g Lentejas", d: "200g Tofu, Espárragos" }, sat: { b: "Batido Proteínas", l: "150g Seitan", d: "150g Tempeh" }, sun: { b: "200g Tofu", l: "150g Garbanzos", d: "150g Lentejas, Brócoli" } }
+            },
+            cartItems: {
+              female: ["1kg Yogur Griego", "14 Huevos", "300g Pollo", "300g Salmón", "300g Sardinas", "500g Kale/Bok Choy", "500g Brócoli", "Vit D3, K2, Magnesio, Colágeno"],
+              male: ["1.5kg Yogur", "21 Huevos", "600g Pollo", "600g Filete", "400g Salmón", "700g Kale", "Vit D3, K2, Magnesio, Colágeno"],
+              vegan: ["1.5kg Tofu (Calcio)", "600g Lentejas", "500g Tempeh", "500g Garbanzos", "700g Kale", "Vegan D3, K2, Magnesio, Aminoácidos"]
+            }
           },
           pt: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Método Oficial", scoreLabel: "Saúde Óssea", level: "NIV", protocol: "Protocolo", diet: "Dieta", gym: "Ginásio", stats: "Progresso", vault: "O Livro", viewSide: "Vista Lateral", viewFront: "Vista Frontal",
-              forge: { title: "Protocolo Diário", completedTitle: "Concluído!", completedDesc: "Sinal mecânico e nutricional enviado.", streak: "Série", guideBtn: "Como usar o App", guide: { intro: "Janela de 84 dias.", s1Title: "1. O Protocolo", s1Desc: "Marque os 5 pilares.", s2Title: "2. Ginásio", s2Desc: "Domine as cargas.", s3Title: "3. Dieta", s3Desc: "Otimize a absorção." } },
-              dietUI: { title: "Plano Nutricional", desc: "Ingredientes de alta biodisponibilidade.", tabs: { menu: "Menu", cart: "Compras" }, cartTitle: "Carrinho Estimado", cartDesc: "Quantidades para 7 dias.", categories: { proteins: "Proteínas", produce: "Vegetais", pantry: "Suplementos" }, profiles: { female: "Mulher", male: "Homem", vegan: "Vegano" }, days: { mon: "Seg", tue: "Ter", wed: "Qua", thu: "Qui", fri: "Sex", sat: "Sáb", sun: "Dom" }, meals: { breakfast: "Pequeno-almoço", snack1: "Lanche", lunch: "Almoço", snack2: "Lanche", dinner: "Jantar", tea: "Chá", supplements: "Suplementos" }, reset: "Redefinir" },
-              gymUI: { title: "Biomecânica", desc: "A carga mecânica é a linguagem dos ossos.", tabs: { daily: "Diário", liftmor: "LIFTMOR", redlines: "Linhas Vermelhas" }, labels: { sets: "Séries", reps: "Reps", tempo: "Tempo", rest: "Descanso", focus: "Foco:", breath: "Respir:", execution: "Execução:", weight: "Peso:" }, phases: { eccentric: "Excêntrica", bottom_pause: "Isométrica", concentric: "Concêntrica", top_pause: "Pausa", rest: "Descanso", breathing: "Respiração", ready: "Pronto" }, huds: { hiphinge: "DOBRADIÇA DO QUADRIL", hipsdown: "QUADRIL ABAIXO", bracecore: "CORE RÍGIDO", noarch: "NÃO ARQUEAR!", heeldrop: "IMPACTO CALCANHAR", fracture: "PERIGO!" } },
-              statsUI: { title: "Progresso Clínico", btmTitle: "Reconstrução (12 Sem)", btmDesc: "CTX vs P1NP." }, quizUI: { start: "Iniciar Quiz", next: "Próxima", finish: "Terminar", correct: "Correto!", incorrect: "Incorreto", explanation: "Razão:" }
+              title: "UNBREAKABLE", subtitle: "Método Oficial", protocol: "Protocolo", diet: "Dieta", gym: "Ginásio",
+              viewSide: "Vista Lateral", viewFront: "Vista Frontal",
+              forge: { title: "Protocolo Diário", completedDesc: "Sinal mecânico e nutricional enviado. Ossos a reconstruir.", guideBtn: "Como usar a App", s1Title: "1. Marque os 5 pilares.", s2Title: "2. Carga segura.", s3Title: "3. Otimize o cálcio." },
+              dietUI: { title: "Plano Nutricional", desc: "Baixo oxalato & alta biodisponibilidade.", tabs: { menu: "Menu", cart: "Compras" }, profiles: { female: "Mulher", male: "Homem", vegan: "Vegano" }, days: { mon: "Seg", tue: "Ter", wed: "Qua", thu: "Qui", fri: "Sex", sat: "Sáb", sun: "Dom" }, reset: "Redefinir" },
+              gymUI: { title: "Biomecânica", desc: "A carga mecânica desencadeia o crescimento.", tabs: { daily: "Diário", liftmor: "LIFTMOR", redlines: "Linhas Vermelhas" }, labels: { sets: "Séries", reps: "Reps", tempo: "Tempo", rest: "Descanso", focus: "Foco:", breath: "Respir:", execution: "Execução:", weight: "Peso:" }, phases: { eccentric: "Excêntrica", bottom_pause: "Isométrica", concentric: "Concêntrica", top_pause: "Pausa", rest: "Descanso", breathing: "Respiração", ready: "Pronto" }, huds: { hiphinge: "DOBRADIÇA QUADRIL", hipsdown: "QUADRIL ABAIXO", bracecore: "CORE RÍGIDO", noarch: "NÃO ARQUEAR!", heeldrop: "CALCANHAR", fracture: "PERIGO FRATURA!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Quantidade", tbs: "TBS (3D)", arch: "Arquitetura" }, nutrition: { d3: "D3", abs: "Absorbe", calcium: "Cálcio", k2: "K2", dir: "Direciona" }, biomechanics: { flex: "Flexão Espinal", hinge: "Dobradiça do Quadril" }, btm: { ctx: "CTX (Demolição)", targetDown: "↓ Meta <300", p1np: "P1NP (Construção)", targetUp: "↑ Meta >45" } },
-            habits: [ { name: "Manhã: Vit D3 + K2", category: "Ortomolecular", desc: "Absorve e direciona o cálcio." }, { name: "10-Min Descompressão", category: "Neuromuscular", desc: "Neutraliza a gravidade." }, { name: "LIFTMOR", category: "Biomecânica", desc: "Estresse mecânico (Lei de Wolff)." }, { name: "Baixo Oxalato & Proteínas", category: "Eixo Intestinal", desc: "Maximiza a absorção." }, { name: "Noite: Magnésio + Colágeno", category: "Ortomolecular", desc: "Matriz flexível." } ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g Iogurte Grego."}] }, male: { mon: [{type: "breakfast", content: "3 Ovos."}] }, vegan: { mon: [{type: "breakfast", content: "150g Tofu."}] } },
-            chapters: [{ id: 1, title: "Revolução Diagnóstica", subtitle: "Além do DXA", sections: [{ type: 'text', content: "O DXA ignora a arquitetura 3D." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "Limite do DXA?", opts: ["Radiação", "Ignora a arquitetura 3D", "Lento"], ans: 1, exp: "Mede quantidade." } }]
+            habits: [
+              { name: "Vit D3 + K2 MK-7", desc: "Absorve e direciona o cálcio." }, { name: "10-Min Descompressão", desc: "Neutraliza a gravidade." },
+              { name: "LIFTMOR / Cargas", desc: "Lei de Wolff." }, { name: "Baixo Oxalato & Proteínas", desc: "Nutre os osteoblastos." }, { name: "Magnésio + Colágeno", desc: "Matriz flexível." }
+            ],
+            gymExercises: {
+              daily: [{ name: "Descompressão", desc: "Reset espinal.", focus: "Elongação", breath: "Diafragmática", steps: ["Deitado, joelhos dobrados.", "Pélvis neutra.", "Respirar."] }, { name: "Bird-Dog", desc: "Anti-flexão.", focus: "Estabilidade", breath: "Exalar", steps: ["De quatro.", "Apertar core.", "Estender braço/perna."] }],
+              liftmor: [{ name: "Peso Morto (RDL)", desc: "Carga posterior.", focus: "Glúteos", breath: "Apertar, exalar", steps: ["Dobrar quadris.", "Costas neutras.", "Apertar glúteos."] }, { name: "Goblet Squat", desc: "Estresse vertical.", focus: "Tronco reto", breath: "Apertar, exalar", steps: ["Segurar peso.", "Sentar atrás.", "Empurrar calcanhares."] }, { name: "Overhead Press", desc: "Carga axial.", focus: "Bloqueio", breath: "Exalar", steps: ["Apertar core.", "Empurrar barra.", "Bloquear cotovelos."] }, { name: "Impactos", desc: "Onda de choque.", focus: "Calcanhar", breath: "Exalar forte", steps: ["Na ponta dos pés.", "Cair sobre calcanhares.", "Pernas rígidas."] }],
+              redlines: [{ name: "Flexão Espinal", desc: "Fraturas em cunha.", focus: "Evitar", breath: "N/A", steps: ["Nunca curvar as costas com carga."] }, { name: "Sit-ups", desc: "Esmaga os discos.", focus: "Evitar", breath: "N/A", steps: ["Nunca fazer abdominais clássicos."] }]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g Iogurte Grego, Sementes", l: "150g Frango, Couve", d: "150g Salmão, Brócolos" }, tue: { b: "2 Ovos, Queijo", l: "150g Peru, Bok Choy", d: "150g Sardinhas, Quinoa" }, wed: { b: "150g Queijo Cottage", l: "150g Salada Frango", d: "150g Tofu, Espargos" }, thu: { b: "150g Iogurte Grego", l: "150g Salmão, Vegetais", d: "150g Carne, Brócolos" }, fri: { b: "2 Ovos", l: "150g Peru", d: "150g Sardinhas, Bok Choy" }, sat: { b: "150g Cottage", l: "150g Frango", d: "150g Salmão, Espargos" }, sun: { b: "150g Iogurte", l: "150g Sardinhas", d: "150g Tofu, Brócolos" } },
+              male: { mon: { b: "3 Ovos, Queijo", l: "200g Frango, Couve", d: "200g Bife, Brócolos" }, tue: { b: "200g Iogurte Grego", l: "200g Peru, Bok Choy", d: "200g Salmão, Espargos" }, wed: { b: "3 Ovos", l: "200g Sardinhas, Quinoa", d: "200g Porco, Vegetais" }, thu: { b: "200g Cottage", l: "200g Frango", d: "200g Bife, Brócolos" }, fri: { b: "3 Ovos", l: "200g Peru", d: "200g Salmão, Bok Choy" }, sat: { b: "200g Iogurte", l: "200g Sardinhas", d: "200g Porco, Espargos" }, sun: { b: "3 Ovos", l: "200g Frango", d: "200g Bife, Vegetais" } },
+              vegan: { mon: { b: "200g Tofu mexido", l: "150g Lentilhas, Couve", d: "150g Tempeh, Brócolos" }, tue: { b: "150g Iogurte Soja, Sementes", l: "150g Grão de bico", d: "200g Tofu, Espargos" }, wed: { b: "Aveia", l: "150g Seitan", d: "150g Lentilhas, Quinoa" }, thu: { b: "200g Tofu", l: "150g Tempeh", d: "150g Grão de bico, Brócolos" }, fri: { b: "150g Iogurte Soja", l: "150g Lentilhas", d: "200g Tofu, Espargos" }, sat: { b: "Batido Proteína", l: "150g Seitan", d: "150g Tempeh" }, sun: { b: "200g Tofu", l: "150g Grão de bico", d: "150g Lentilhas, Brócolos" } }
+            },
+            cartItems: {
+              female: ["1kg Iogurte Grego", "14 Ovos", "300g Frango", "300g Salmão", "300g Sardinhas", "500g Couve/Bok Choy", "500g Brócolos", "Vit D3, K2, Magnésio, Colágeno"],
+              male: ["1.5kg Iogurte", "21 Ovos", "600g Frango", "600g Bife", "400g Salmón", "700g Couve", "Vit D3, K2, Magnésio, Colágeno"],
+              vegan: ["1.5kg Tofu (Cálcio)", "600g Lentilhas", "500g Tempeh", "500g Grão", "700g Couve", "Vegan D3, K2, Magnésio, Aminoácidos"]
+            }
           },
           pl: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "Oficjalna Metoda", scoreLabel: "Zdrowie Kości", level: "POZ", protocol: "Protokół", diet: "Dieta", gym: "Siłownia", stats: "Postępy", vault: "Księga", viewSide: "Widok z boku", viewFront: "Widok z przodu",
-              forge: { title: "Codzienny Protokół", completedTitle: "Ukończono!", completedDesc: "Sygnał mechaniczny wysłany. Kości się odbudowują.", streak: "Seria", guideBtn: "Jak używać aplikacji", guide: { intro: "Okno 84 dni.", s1Title: "1. Protokół", s1Desc: "5 filarów codziennie.", s2Title: "2. Siłownia", s2Desc: "Opanuj duże ciężary.", s3Title: "3. Dieta", s3Desc: "Optymalizuj przyswajanie wapnia." } },
-              dietUI: { title: "Plan Żywieniowy", desc: "Składniki o wysokiej biodostępności.", tabs: { menu: "Menu", cart: "Zakupy" }, cartTitle: "Koszyk", cartDesc: "Ilości na 7 dni.", categories: { proteins: "Białka", produce: "Warzywa", pantry: "Suplementy" }, profiles: { female: "Kobieta", male: "Mężczyzna", vegan: "Weganin" }, days: { mon: "Pon", tue: "Wto", wed: "Śro", thu: "Czw", fri: "Pią", sat: "Sob", sun: "Nie" }, meals: { breakfast: "Śniadanie", snack1: "Przekąska", lunch: "Obiad", snack2: "Przekąska", dinner: "Kolacja", tea: "Herbata", supplements: "Suplementy" }, reset: "Resetuj" },
-              gymUI: { title: "Biomechanika", desc: "Obciążenie mechaniczne to jedyny język kości.", tabs: { daily: "Codziennie", liftmor: "LIFTMOR", redlines: "Czerwone Linie" }, labels: { sets: "Serie", reps: "Powt", tempo: "Tempo", rest: "Odpoczynek", focus: "Cel:", breath: "Oddech:", execution: "Wykonanie:", weight: "Ciężar:" }, phases: { eccentric: "Ekscentryczna", bottom_pause: "Izometryczna", concentric: "Koncentryczna", top_pause: "Pauza", rest: "Odpoczynek", breathing: "Oddychanie", ready: "Gotowe" }, huds: { hiphinge: "ZAWIAS BIODROWY", hipsdown: "BIODRA W DÓŁ", bracecore: "NAPIĘCIE CORE", noarch: "NIE WYGINAJ!", heeldrop: "UDERZENIE PIĘTĄ", fracture: "ZAGROŻENIE!" } },
-              statsUI: { title: "Postęp Kliniczny", btmTitle: "12-Tygodniowa Odbudowa", btmDesc: "CTX vs P1NP." }, quizUI: { start: "Rozpocznij Quiz", next: "Następne", finish: "Zakończ", correct: "Dobrze!", incorrect: "Źle", explanation: "Powód:" }
+              title: "UNBREAKABLE", subtitle: "Oficjalna Metoda", protocol: "Protokół", diet: "Dieta", gym: "Siłownia",
+              viewSide: "Widok z boku", viewFront: "Widok z przodu",
+              forge: { title: "Codzienny Protokół", completedDesc: "Sygnał wysłany. Kości się odbudowują.", guideBtn: "Jak używać", s1Title: "1. 5 filarów.", s2Title: "2. Bezpieczne ciężary.", s3Title: "3. Optymalny wapń." },
+              dietUI: { title: "Plan Żywieniowy", desc: "Niski szczawian & wysoka biodostępność.", tabs: { menu: "Menu", cart: "Zakupy" }, profiles: { female: "Kobieta", male: "Mężczyzna", vegan: "Weganin" }, days: { mon: "Pon", tue: "Wto", wed: "Śro", thu: "Czw", fri: "Pią", sat: "Sob", sun: "Nie" }, reset: "Resetuj" },
+              gymUI: { title: "Biomechanika", desc: "Obciążenie stymuluje wzrost.", tabs: { daily: "Codziennie", liftmor: "LIFTMOR", redlines: "Czerwone Linie" }, labels: { sets: "Serie", reps: "Powt", tempo: "Tempo", rest: "Odpoczynek", focus: "Cel:", breath: "Oddech:", execution: "Wykonanie:", weight: "Ciężar:" }, phases: { eccentric: "Ekscentryczna", bottom_pause: "Izometryczna", concentric: "Koncentryczna", top_pause: "Pauza", rest: "Odpoczynek", breathing: "Oddychanie", ready: "Gotowe" }, huds: { hiphinge: "ZAWIAS BIODROWY", hipsdown: "BIODRA W DÓŁ", bracecore: "NAPIĘCIE CORE", noarch: "NIE WYGINAJ!", heeldrop: "PIĘTY", fracture: "ZAGROŻENIE!" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "Tylko Ilość", tbs: "TBS (3D)", arch: "Architektura" }, nutrition: { d3: "D3", abs: "Wchłania", calcium: "Wapń", k2: "K2", dir: "Kieruje" }, biomechanics: { flex: "Zgięcie Kręgosłupa", hinge: "Zawias Biodrowy" }, btm: { ctx: "CTX (Rozpad)", targetDown: "↓ Cel <300", p1np: "P1NP (Budowa)", targetUp: "↑ Cel >45" } },
-            habits: [ { name: "Rano: Wit D3 + K2", category: "Ortomolekularna", desc: "Wchłania i kieruje wapń." }, { name: "10-Min Dekompresja", category: "Nerwowo-mięśniowa", desc: "Neutralizuje grawitację." }, { name: "LIFTMOR", category: "Biomechanika", desc: "Stres mechaniczny (Prawo Wolffa)." }, { name: "Niski Szczawian & Białko", category: "Oś Jelitowa", desc: "Maksymalizuje wchłanianie." }, { name: "Wieczór: Magnez + Kolagen", category: "Ortomolekularna", desc: "Elastyczna matryca." } ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g Jogurt Grecki."}] }, male: { mon: [{type: "breakfast", content: "3 Jajka."}] }, vegan: { mon: [{type: "breakfast", content: "150g Tofu."}] } },
-            chapters: [{ id: 1, title: "Rewolucja Diagnostyczna", subtitle: "Poza Iluzją DXA", sections: [{ type: 'text', content: "DXA ignoruje architekturę 3D." }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "Limit DXA?", opts: ["Promieniowanie", "Ignoruje architekturę 3D", "Wolne"], ans: 1, exp: "Mierzy ilość." } }]
+            habits: [
+              { name: "Vit D3 + K2 MK-7", desc: "Wchłania i kieruje wapń." }, { name: "10-Min Dekompresja", desc: "Neutralizuje grawitację." },
+              { name: "LIFTMOR / Ciężary", desc: "Prawo Wolffa." }, { name: "Niski Szczawian & Białko", desc: "Odżywia osteoblasty." }, { name: "Magnez + Kolagen", desc: "Elastyczna matryca." }
+            ],
+            gymExercises: {
+              daily: [{ name: "Dekompresja", desc: "Reset kręgosłupa.", focus: "Wydłużenie", breath: "Przeponowe", steps: ["Na plecach, zgięte kolana.", "Miednica neutralnie.", "Oddychaj."] }, { name: "Bird-Dog", desc: "Anty-zgięcie.", focus: "Stabilność", breath: "Wydech", steps: ["Na czworakach.", "Zepnij core.", "Wyprostuj rękę/nogę."] }],
+              liftmor: [{ name: "Martwy Ciąg (RDL)", desc: "Obciążenie tylne.", focus: "Pośladki", breath: "Zepnij, wydech w górę", steps: ["Zgięcie w biodrach.", "Plecy proste.", "Zepnij pośladki."] }, { name: "Goblet Squat", desc: "Stres pionowy.", focus: "Prosty tułów", breath: "Zepnij, wydech w górę", steps: ["Trzymaj ciężar.", "Usiądź w tył.", "Pchaj z pięt."] }, { name: "Overhead Press", desc: "Obciążenie osiowe.", focus: "Blokada", breath: "Wydech", steps: ["Zepnij core.", "Wypchnij sztangę.", "Zablokuj łokcie."] }, { name: "Impakty", desc: "Fala uderzeniowa.", focus: "Uderzenie piętą", breath: "Mocny wydech", steps: ["Na palce.", "Spadnij na pięty.", "Sztywne nogi."] }],
+              redlines: [{ name: "Zgięcie Kręgosłupa", desc: "Złamania klinowe.", focus: "Unikać", breath: "N/A", steps: ["Nigdy nie zginaj pleców z ciężarem."] }, { name: "Sit-upy", desc: "Zgniata dyski.", focus: "Unikać", breath: "N/A", steps: ["Nigdy nie rób klasycznych brzuszków."] }]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g Jogurt Grecki, Pestki", l: "150g Kurczak, Jarmuż", d: "150g Łosoś, Brokuły" }, tue: { b: "2 Jajka, Ser", l: "150g Indyk, Bok Choy", d: "150g Sardynki, Komosa" }, wed: { b: "150g Serek Wiejski", l: "150g Sałatka z kurczakiem", d: "150g Tofu, Szparagi" }, thu: { b: "150g Jogurt", l: "150g Łosoś, Warzywa", d: "150g Wołowina, Brokuły" }, fri: { b: "2 Jajka", l: "150g Indyk", d: "150g Sardynki, Bok Choy" }, sat: { b: "150g Serek", l: "150g Kurczak", d: "150g Łosoś, Szparagi" }, sun: { b: "150g Jogurt", l: "150g Sardynki", d: "150g Tofu, Brokuły" } },
+              male: { mon: { b: "3 Jajka, Ser", l: "200g Kurczak, Jarmuż", d: "200g Stek, Brokuły" }, tue: { b: "200g Jogurt Grecki", l: "200g Indyk, Bok Choy", d: "200g Łosoś, Szparagi" }, wed: { b: "3 Jajka", l: "200g Sardynki, Komosa", d: "200g Wieprzowina, Warzywa" }, thu: { b: "200g Serek", l: "200g Kurczak", d: "200g Stek, Brokuły" }, fri: { b: "3 Jajka", l: "200g Indyk", d: "200g Łosoś, Bok Choy" }, sat: { b: "200g Jogurt", l: "200g Sardynki", d: "200g Wieprzowina, Szparagi" }, sun: { b: "3 Jajka", l: "200g Kurczak", d: "200g Stek, Warzywa" } },
+              vegan: { mon: { b: "200g Tofucznica", l: "150g Soczewica, Jarmuż", d: "150g Tempeh, Brokuły" }, tue: { b: "150g Jogurt Sojowy, Pestki", l: "150g Ciecierzyca", d: "200g Tofu, Szparagi" }, wed: { b: "Owsianka", l: "150g Seitan", d: "150g Soczewica, Komosa" }, thu: { b: "200g Tofu", l: "150g Tempeh", d: "150g Ciecierzyca, Brokuły" }, fri: { b: "150g Jogurt Sojowy", l: "150g Soczewica", d: "200g Tofu, Szparagi" }, sat: { b: "Szejk Białkowy", l: "150g Seitan", d: "150g Tempeh" }, sun: { b: "200g Tofu", l: "150g Ciecierzyca", d: "150g Soczewica, Brokuły" } }
+            },
+            cartItems: {
+              female: ["1kg Jogurt Grecki", "14 Jajek", "300g Kurczak", "300g Łosoś", "300g Sardynki", "500g Jarmuż/Bok Choy", "500g Brokuły", "Vit D3, K2, Magnez, Kolagen"],
+              male: ["1.5kg Jogurt", "21 Jajek", "600g Kurczak", "600g Stek", "400g Łosoś", "700g Jarmuż", "Vit D3, K2, Magnez, Kolagen"],
+              vegan: ["1.5kg Tofu (Wapń)", "600g Soczewica", "500g Tempeh", "500g Ciecierzyca", "700g Jarmuż", "Vegan D3, K2, Magnez, Aminokwasy"]
+            }
           },
           ja: {
             ui: {
-              title: "UNBREAKABLE", subtitle: "公式メソッド", scoreLabel: "骨スコア", level: "LVL", protocol: "プロトコル", diet: "食事", gym: "ジム", stats: "進捗", vault: "本", viewSide: "側面ビュー", viewFront: "正面ビュー",
-              forge: { title: "毎日のプロトコル", completedTitle: "完了！", completedDesc: "機械的シグナルが送信されました。骨が再構築されています。", streak: "連続", guideBtn: "アプリの使い方", guide: { intro: "84日間のウィンドウ。", s1Title: "1. プロトコル", s1Desc: "5つの柱をチェック。", s2Title: "2. ジム", s2Desc: "重い負荷をマスター。", s3Title: "3. 食事", s3Desc: "カルシウム吸収を最適化。" } },
-              dietUI: { title: "栄養計画", desc: "高生体利用効率の成分。", tabs: { menu: "メニュー", cart: "買い物リスト" }, cartTitle: "推定リスト", cartDesc: "7日間の量。", categories: { proteins: "タンパク質", produce: "野菜", pantry: "サプリメント" }, profiles: { female: "女性", male: "男性", vegan: "ヴィーガン" }, days: { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金", sat: "土", sun: "日" }, meals: { breakfast: "朝食", snack1: "軽食", lunch: "昼食", snack2: "軽食", dinner: "夕食", tea: "お茶", supplements: "サプリ" }, reset: "リセット" },
-              gymUI: { title: "生体力学", desc: "機械的負荷は骨の言語です。", tabs: { daily: "毎日", liftmor: "LIFTMOR", redlines: "レッドライン" }, labels: { sets: "セット", reps: "回数", tempo: "テンポ", rest: "休憩", focus: "集中:", breath: "呼吸:", execution: "実行:", weight: "推奨重量:" }, phases: { eccentric: "エキセントリック", bottom_pause: "アイソメトリック", concentric: "コンセントリック", top_pause: "一時停止", rest: "休憩", breathing: "呼吸", ready: "準備完了" }, huds: { hiphinge: "ヒップヒンジ", hipsdown: "腰を下げる", bracecore: "体幹を固定", noarch: "背中を反らさない", heeldrop: "かかとの衝撃", fracture: "骨折の危険！" } },
-              statsUI: { title: "臨床的進捗", btmTitle: "12週間の再構築", btmDesc: "CTXとP1NPの追跡。" }, quizUI: { start: "クイズを開始", next: "次へ", finish: "終了", correct: "正解！", incorrect: "不正解", explanation: "理由:" }
+              title: "UNBREAKABLE", subtitle: "公式メソッド", protocol: "プロトコル", diet: "食事", gym: "ジム",
+              viewSide: "側面ビュー", viewFront: "正面ビュー",
+              forge: { title: "毎日のプロトコル", completedDesc: "シグナル送信完了。骨が再構築されています。", guideBtn: "使い方", s1Title: "1. 5つの柱をチェック。", s2Title: "2. 安全に負荷をかける。", s3Title: "3. カルシウムを最適化。" },
+              dietUI: { title: "栄養計画", desc: "低シュウ酸＆高生体利用効率", tabs: { menu: "メニュー", cart: "買い物" }, profiles: { female: "女性", male: "男性", vegan: "ヴィーガン" }, days: { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金", sat: "土", sun: "日" }, reset: "リセット" },
+              gymUI: { title: "生体力学", desc: "機械的負荷が骨成長を促す。", tabs: { daily: "毎日", liftmor: "LIFTMOR", redlines: "禁止事項" }, labels: { sets: "セット", reps: "回数", tempo: "テンポ", rest: "休憩", focus: "集中:", breath: "呼吸:", execution: "実行:", weight: "推奨重量:" }, phases: { eccentric: "エキセントリック", bottom_pause: "アイソメトリック", concentric: "コンセントリック", top_pause: "一時停止", rest: "休憩", breathing: "呼吸", ready: "準備完了" }, huds: { hiphinge: "ヒップヒンジ", hipsdown: "腰を下げる", bracecore: "体幹を固定", noarch: "反らさない！", heeldrop: "かかと", fracture: "骨折の危険！" } }
             },
-            schemas: { diagnostics: { dxa: "DXA (2D)", qty: "量のみ", tbs: "TBS (3D)", arch: "建築" }, nutrition: { d3: "D3", abs: "吸収", calcium: "カルシウム", k2: "K2", dir: "誘導" }, biomechanics: { flex: "脊椎屈曲", hinge: "ヒップヒンジ" }, btm: { ctx: "CTX (破壊)", targetDown: "↓ 目標 <300", p1np: "P1NP (構築)", targetUp: "↑ 目標 >45" } },
-            habits: [ { name: "朝: Vit D3 + K2", category: "分子整合", desc: "カルシウムを吸収し誘導。" }, { name: "10分 減圧", category: "神経筋", desc: "重力を中和。" }, { name: "LIFTMOR", category: "生体力学", desc: "機械的ストレス（ウォルフの法則）。" }, { name: "低シュウ酸＆タンパク質", category: "腸内軸", desc: "吸収を最大化。" }, { name: "夜: マグネシウム + コラーゲン", category: "分子整合", desc: "柔軟なマトリックス。" } ],
-            diet: { female: { mon: [{type: "breakfast", content: "150g ギリシャヨーグルト。"}] }, male: { mon: [{type: "breakfast", content: "3 卵。"}] }, vegan: { mon: [{type: "breakfast", content: "150g 豆腐。"}] } },
-            chapters: [{ id: 1, title: "診断の革命", subtitle: "DXAの錯覚を超えて", sections: [{ type: 'text', content: "DXAは3D構造を無視します。" }, { type: 'schema', id: 'diagnostics' }], quiz: { q: "DXAの限界は？", opts: ["放射線", "3D構造を無視", "遅い"], ans: 1, exp: "量のみを測定。" } }]
+            habits: [
+              { name: "Vit D3 + K2 MK-7", desc: "カルシウムを吸収し誘導。" }, { name: "10分 減圧", desc: "重力を中和。" },
+              { name: "LIFTMOR / 重い負荷", desc: "ウォルフの法則。" }, { name: "低シュウ酸＆タンパク質", desc: "骨芽細胞の栄養。" }, { name: "マグネシウム + コラーゲン", desc: "柔軟なマトリックス。" }
+            ],
+            gymExercises: {
+              daily: [{ name: "減圧", desc: "脊椎のリセット", focus: "伸長", breath: "横隔膜", steps: ["仰向け、膝を曲げる。", "骨盤をニュートラルに。", "深呼吸。"] }, { name: "バードドッグ", desc: "体幹の抗屈曲", focus: "安定性", breath: "伸ばす時に息を吐く", steps: ["四つん這い。", "体幹を固める。", "対角の手足を伸ばす。"] }],
+              liftmor: [{ name: "ルーマニアンデッドリフト", desc: "後面の負荷", focus: "臀部", breath: "固めて、吐きながら上がる", steps: ["股関節から曲げる。", "背骨はニュートラル。", "お尻を締める。"] }, { name: "ゴブレットスクワット", desc: "垂直ストレス", focus: "直立", breath: "固めて、吐きながら上がる", steps: ["重りを持つ。", "後ろに座る。", "かかとで押す。"] }, { name: "オーバーヘッドプレス", desc: "軸の負荷", focus: "ロックアウト", breath: "押す時に吐く", steps: ["体幹を固める。", "バーを押し上げる。", "肘をロックする。"] }, { name: "インパクト", desc: "衝撃波", focus: "かかと", breath: "鋭く吐く", steps: ["つま先立ち。", "かかとに落ちる。", "脚を硬く保つ。"] }],
+              redlines: [{ name: "脊椎の屈曲", desc: "圧迫骨折の原因", focus: "避ける", breath: "N/A", steps: ["負荷をかけて背中を丸めない。"] }, { name: "シットアップ", desc: "椎間板を潰す", focus: "避ける", breath: "N/A", steps: ["腹筋運動は絶対にしない。"] }]
+            },
+            dietMenu: {
+              female: { mon: { b: "150g ギリシャヨーグルト, 種", l: "150g 鶏肉, ケール", d: "150g 鮭, ブロッコリー" }, tue: { b: "2 卵, チーズ", l: "150g 七面鳥, チンゲン菜", d: "150g イワシ, キヌア" }, wed: { b: "150g カッテージチーズ", l: "150g チキンサラダ", d: "150g 豆腐, アスパラガス" }, thu: { b: "150g ヨーグルト", l: "150g 鮭, 野菜", d: "150g 牛肉, ブロッコリー" }, fri: { b: "2 卵", l: "150g 七面鳥", d: "150g イワシ, チンゲン菜" }, sat: { b: "150g カッテージチーズ", l: "150g 鶏肉", d: "150g 鮭, アスパラガス" }, sun: { b: "150g ヨーグルト", l: "150g イワシ", d: "150g 豆腐, ブロッコリー" } },
+              male: { mon: { b: "3 卵, チーズ", l: "200g 鶏肉, ケール", d: "200g ステーキ, ブロッコリー" }, tue: { b: "200g ギリシャヨーグルト", l: "200g 七面鳥, チンゲン菜", d: "200g 鮭, アスパラガス" }, wed: { b: "3 卵", l: "200g イワシ, キヌア", d: "200g 豚肉, 野菜" }, thu: { b: "200g カッテージチーズ", l: "200g 鶏肉", d: "200g ステーキ, ブロッコリー" }, fri: { b: "3 卵", l: "200g 七面鳥", d: "200g 鮭, チンゲン菜" }, sat: { b: "200g ヨーグルト", l: "200g イワシ", d: "200g 豚肉, アスパラガス" }, sun: { b: "3 卵", l: "200g 鶏肉", d: "200g ステーキ, 野菜" } },
+              vegan: { mon: { b: "200g 豆腐スクランブル", l: "150g レンズ豆, ケール", d: "150g テンペ, ブロッコリー" }, tue: { b: "150g 豆乳ヨーグルト, 種", l: "150g ひよこ豆", d: "200g 豆腐, アスパラガス" }, wed: { b: "オートミール", l: "150g セイタン", d: "150g レンズ豆, キヌア" }, thu: { b: "200g 豆腐", l: "150g テンペ", d: "150g ひよこ豆, ブロッコリー" }, fri: { b: "150g 豆乳ヨーグルト", l: "150g レンズ豆", d: "200g 豆腐, アスパラガス" }, sat: { b: "プロテイン", l: "150g セイタン", d: "150g テンペ" }, sun: { b: "200g 豆腐", l: "150g ひよこ豆", d: "150g レンズ豆, ブロッコリー" } }
+            },
+            cartItems: {
+              female: ["1kg ギリシャヨーグルト", "14 卵", "300g 鶏肉", "300g 鮭", "300g イワシ", "500g ケール/チンゲン菜", "500g ブロッコリー", "Vit D3, K2, マグネシウム, コラーゲン"],
+              male: ["1.5kg ヨーグルト", "21 卵", "600g 鶏肉", "600g ステーキ", "400g 鮭", "700g ケール", "Vit D3, K2, マグネシウム, コラーゲン"],
+              vegan: ["1.5kg 豆腐 (カルシウム)", "600g レンズ豆", "500g テンペ", "500g ひよこ豆", "700g ケール", "Vegan D3, K2, マグネシウム, アミノ酸"]
+            }
           }
-        };
-
-        const GYM_DATA = {
-          daily: [
-            { name: "Decompression (Hook-lying)", desc: "Neutralizes spinal gravity.", weight: "0 kg / 0 lbs", focus: "Axial Elongation", breath: "Diaphragmatic", sets: "1", reps: "10 Min", tempo: "Static", rest: "None", icon: "activity", visual: "hooklying", steps: ["Lie flat on back with knees bent.", "Pelvis in neutral position.", "Breathe deeply into abdomen."] },
-            { name: "Bird-Dog", desc: "Anti-flexion core strength.", weight: "0 kg / 0 lbs", focus: "Spinal Stability", breath: "Exhale on extension", sets: "3", reps: "10 per side", tempo: "2-2-2-0", rest: "60 Sec", icon: "shield", visual: "birddog", steps: ["Start on all fours.", "Brace core tightly.", "Extend opposite arm and leg."] }
-          ],
-          liftmor: [
-            { name: "Romanian Deadlift (RDL)", desc: "Posterior chain mechanical load.", weight: "20-40kg (45-90 lbs)", focus: "Glute & Femur Drive", breath: "Brace, exhale up", sets: "5", reps: "5", tempo: "3-0-1-0", rest: "120 Sec", icon: "dumbbell", visual: "rdl", steps: ["Barbell over mid-foot.", "Spine rigid, hinge at hips.", "Squeeze glutes to stand."] },
-            { name: "Goblet Squat", desc: "Front-loaded vertical stress.", weight: "8-16kg (15-35 lbs)", focus: "Upright Torso", breath: "Brace, exhale up", sets: "4", reps: "8", tempo: "2-1-1-0", rest: "90 Sec", icon: "dumbbell", visual: "squat", steps: ["Hold kettlebell vertically.", "Sit hips down and back.", "Drive through heels."] },
-            { name: "Overhead Press", desc: "Axial spinal loading.", weight: "4-10kg per arm", focus: "Overhead Lockout", breath: "Brace, exhale on press", sets: "4", reps: "6", tempo: "2-0-1-0", rest: "120 Sec", icon: "dumbbell", visual: "overhead", steps: ["Stand shoulder-width.", "Brace core hard.", "Press straight up."] },
-            { name: "Impact / Jump Drops", desc: "Osteogenic shockwave.", weight: "0 kg", focus: "Heel Strike Impact", breath: "Sharp exhale", sets: "3", reps: "5 Drops", tempo: "Explosive", rest: "60 Sec", icon: "activity", visual: "impact", steps: ["Rise onto tiptoes.", "Drop flat onto heels.", "Keep legs stiff but unlocked."] }
-          ],
-          redlines: [
-            { name: "Spinal Flexion / Sit-ups", desc: "Causes wedge fractures.", weight: "PROHIBITED", focus: "Avoid at all costs", breath: "Normal", sets: "0", reps: "0", tempo: "Stop", rest: "None", icon: "shield", visual: "flexion", steps: ["Never perform sit-ups.", "Never bend and twist."] }
-          ]
         };
 
         const LANGUAGES = [
@@ -228,88 +344,89 @@
           <div className="flex flex-col bg-slate-950/50 border border-slate-800 p-2.5 rounded-xl shadow-inner">
             <div className="flex items-center gap-1.5 mb-1.5">
               {React.cloneElement(icon, { className: "w-3.5 h-3.5 text-slate-500" })}
-              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{label}</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider line-clamp-1">{label}</span>
             </div>
-            <span className="text-sm font-black text-slate-200">{value}</span>
+            <span className="text-[11px] font-black text-slate-200 uppercase line-clamp-1">{value}</span>
           </div>
         );
 
-        const GymVisuals = ({ type, progress, phaseKey, currentRep, totalReps, restTimeLeft, lang, t, view }) => {
+        const GymVisuals = ({ type, progress, phaseKey, view, t }) => {
           const easeInOutSine = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
           const p = type === 'impact' ? progress : easeInOutSine(progress); 
           const lerp = (start, end, t) => start + (end - start) * t;
           
           const isRest = phaseKey === 'rest';
-          const isFlexion = type === 'flexion';
-          const breath = isRest || phaseKey === 'top_pause' || phaseKey === 'breathing' ? Math.sin(Date.now() / 300) * 2 : 0;
+          const isFlexion = type === 'flexion' || type === 'situp';
           const isFront = view === 'front';
 
           let s = {}, e = {};
           let instruction = null;
 
+          // LATERAL VIEW COORDINATES
           if (!isFront) {
-            s = { 
-              c:{x:50,y:20}, cv:{x:50,y:30}, p:{x:50,y:55},
-              s1:{x:50,y:30}, e1:{x:45,y:45}, w1:{x:50,y:55}, h1:{x:50,y:55}, k1:{x:50,y:75}, a1:{x:50,y:95},
-              s2:{x:50,y:30}, e2:{x:55,y:45}, w2:{x:50,y:55}, h2:{x:50,y:55}, k2:{x:50,y:75}, a2:{x:50,y:95}
-            };
+            s = { c:{x:50,y:20}, p:{x:50,y:50}, s1:{x:50,y:28}, e1:{x:45,y:42}, w1:{x:50,y:55}, h1:{x:50,y:50}, k1:{x:50,y:72}, a1:{x:50,y:95}, s2:{x:50,y:28}, e2:{x:55,y:42}, w2:{x:50,y:55}, h2:{x:50,y:50}, k2:{x:50,y:72}, a2:{x:50,y:95} };
             e = { ...s };
 
             if (type === 'rdl') {
-              s = { c:{x:40,y:20}, cv:{x:40,y:30}, p:{x:40,y:55}, s1:{x:40,y:30}, e1:{x:40,y:45}, w1:{x:40,y:60}, h1:{x:40,y:55}, k1:{x:40,y:75}, a1:{x:40,y:95}, s2:{x:40,y:30}, e2:{x:40,y:45}, w2:{x:40,y:60}, h2:{x:40,y:55}, k2:{x:40,y:75}, a2:{x:40,y:95} };
-              e = { c:{x:15,y:45}, cv:{x:25,y:45}, p:{x:60,y:55}, s1:{x:25,y:45}, e1:{x:25,y:60}, w1:{x:25,y:75}, h1:{x:60,y:55}, k1:{x:50,y:75}, a1:{x:40,y:95}, s2:{x:25,y:45}, e2:{x:30,y:60}, w2:{x:30,y:75}, h2:{x:60,y:55}, k2:{x:55,y:75}, a2:{x:45,y:95} };
-              instruction = { text: t('ui.gymUI.huds.hiphinge'), x: 65, y: 35, arrow: "M 45 55 L 60 55 M 55 50 L 60 55 L 55 60" };
+              s = { c:{x:40,y:20}, p:{x:40,y:50}, s1:{x:40,y:28}, e1:{x:40,y:45}, w1:{x:40,y:60}, h1:{x:40,y:50}, k1:{x:40,y:72}, a1:{x:40,y:95}, s2:{x:40,y:28}, e2:{x:40,y:45}, w2:{x:40,y:60}, h2:{x:40,y:50}, k2:{x:40,y:72}, a2:{x:40,y:95} };
+              e = { c:{x:20,y:45}, p:{x:60,y:50}, s1:{x:28,y:47}, e1:{x:30,y:65}, w1:{x:30,y:80}, h1:{x:60,y:50}, k1:{x:45,y:72}, a1:{x:40,y:95}, s2:{x:28,y:47}, e2:{x:35,y:65}, w2:{x:35,y:80}, h2:{x:60,y:50}, k2:{x:50,y:72}, a2:{x:45,y:95} };
+              instruction = { text: t('ui.gymUI.huds.hiphinge'), x: 75, y: 35, arrow: "M 55 50 L 70 50 M 65 45 L 70 50 L 65 55" };
             } else if (type === 'squat') {
-              s = { c:{x:50,y:20}, cv:{x:50,y:30}, p:{x:50,y:55}, s1:{x:50,y:30}, e1:{x:45,y:40}, w1:{x:50,y:45}, h1:{x:50,y:55}, k1:{x:50,y:75}, a1:{x:50,y:95}, s2:{x:50,y:30}, e2:{x:55,y:40}, w2:{x:50,y:45}, h2:{x:50,y:55}, k2:{x:50,y:75}, a2:{x:50,y:95} };
-              e = { c:{x:40,y:45}, cv:{x:40,y:55}, p:{x:35,y:80}, s1:{x:40,y:55}, e1:{x:45,y:65}, w1:{x:50,y:60}, h1:{x:35,y:80}, k1:{x:50,y:75}, a1:{x:50,y:95}, s2:{x:40,y:55}, e2:{x:55,y:65}, w2:{x:50,y:60}, h2:{x:35,y:80}, k2:{x:50,y:75}, a2:{x:50,y:95} };
+              s = { c:{x:50,y:20}, p:{x:50,y:50}, s1:{x:50,y:28}, e1:{x:45,y:42}, w1:{x:50,y:45}, h1:{x:50,y:50}, k1:{x:50,y:72}, a1:{x:50,y:95}, s2:{x:50,y:28}, e2:{x:55,y:42}, w2:{x:50,y:45}, h2:{x:50,y:50}, k2:{x:50,y:72}, a2:{x:50,y:95} };
+              e = { c:{x:40,y:45}, p:{x:35,y:75}, s1:{x:40,y:52}, e1:{x:45,y:65}, w1:{x:50,y:60}, h1:{x:35,y:75}, k1:{x:50,y:72}, a1:{x:50,y:95}, s2:{x:40,y:52}, e2:{x:55,y:65}, w2:{x:50,y:60}, h2:{x:35,y:75}, k2:{x:50,y:72}, a2:{x:50,y:95} };
               instruction = { text: t('ui.gymUI.huds.hipsdown'), x: 70, y: 55, arrow: "M 40 85 L 40 95 L 35 90 M 40 95 L 45 90" };
             } else if (type === 'overhead') {
-              s = { c:{x:50,y:30}, cv:{x:50,y:40}, p:{x:50,y:65}, s1:{x:50,y:40}, e1:{x:40,y:55}, w1:{x:45,y:45}, h1:{x:50,y:65}, k1:{x:50,y:80}, a1:{x:50,y:95}, s2:{x:50,y:40}, e2:{x:60,y:55}, w2:{x:55,y:45}, h2:{x:50,y:65}, k2:{x:50,y:80}, a2:{x:50,y:95} };
+              s = { c:{x:50,y:30}, p:{x:50,y:60}, s1:{x:50,y:38}, e1:{x:40,y:50}, w1:{x:45,y:42}, h1:{x:50,y:60}, k1:{x:50,y:80}, a1:{x:50,y:95}, s2:{x:50,y:38}, e2:{x:60,y:50}, w2:{x:55,y:42}, h2:{x:50,y:60}, k2:{x:50,y:80}, a2:{x:50,y:95} };
               e = { ...s, e1:{x:45,y:25}, w1:{x:50,y:10}, e2:{x:55,y:25}, w2:{x:50,y:10} };
               instruction = { text: t('ui.gymUI.huds.bracecore'), x: 75, y: 30, arrow: "M 45 40 L 45 15 M 40 20 L 45 15 L 50 20" };
             } else if (type === 'birddog') {
-              s = { c:{x:15,y:60}, cv:{x:25,y:60}, p:{x:65,y:60}, s1:{x:25,y:60}, e1:{x:25,y:75}, w1:{x:25,y:90}, h1:{x:65,y:60}, k1:{x:65,y:75}, a1:{x:80,y:90}, s2:{x:25,y:60}, e2:{x:25,y:75}, w2:{x:25,y:90}, h2:{x:65,y:60}, k2:{x:65,y:75}, a2:{x:80,y:90} };
+              s = { c:{x:15,y:60}, p:{x:65,y:60}, s1:{x:23,y:60}, e1:{x:25,y:75}, w1:{x:25,y:90}, h1:{x:65,y:60}, k1:{x:65,y:75}, a1:{x:80,y:90}, s2:{x:23,y:60}, e2:{x:25,y:75}, w2:{x:25,y:90}, h2:{x:65,y:60}, k2:{x:65,y:75}, a2:{x:80,y:90} };
               e = { ...s, e1:{x:15,y:60}, w1:{x:5,y:60}, k2:{x:80,y:60}, a2:{x:95,y:60} };
               instruction = { text: t('ui.gymUI.huds.noarch'), x: 50, y: 45, arrow: "" };
             } else if (type === 'impact') {
-              s = { c:{x:50,y:15}, cv:{x:50,y:25}, p:{x:50,y:50}, s1:{x:50,y:25}, e1:{x:45,y:40}, w1:{x:45,y:55}, h1:{x:50,y:50}, k1:{x:50,y:70}, a1:{x:55,y:90}, s2:{x:50,y:25}, e2:{x:55,y:40}, w2:{x:55,y:55}, h2:{x:50,y:50}, k2:{x:50,y:70}, a2:{x:45,y:90} };
-              e = { c:{x:50,y:25}, cv:{x:50,y:35}, p:{x:50,y:60}, s1:{x:50,y:35}, e1:{x:45,y:50}, w1:{x:45,y:65}, h1:{x:50,y:60}, k1:{x:45,y:80}, a1:{x:55,y:95}, s2:{x:50,y:35}, e2:{x:55,y:50}, w2:{x:55,y:65}, h2:{x:50,y:60}, k2:{x:55,y:80}, a2:{x:45,y:95} };
+              s = { c:{x:50,y:15}, p:{x:50,y:45}, s1:{x:50,y:23}, e1:{x:45,y:38}, w1:{x:45,y:55}, h1:{x:50,y:45}, k1:{x:50,y:65}, a1:{x:55,y:85}, s2:{x:50,y:23}, e2:{x:55,y:38}, w2:{x:55,y:55}, h2:{x:50,y:45}, k2:{x:50,y:65}, a2:{x:45,y:85} };
+              e = { ...s, c:{x:50,y:25}, p:{x:50,y:55}, s1:{x:50,y:33}, h1:{x:50,y:55}, k1:{x:45,y:75}, a1:{x:55,y:95}, s2:{x:50,y:33}, h2:{x:50,y:55}, k2:{x:55,y:75}, a2:{x:45,y:95}, w1:{x:45,y:65}, w2:{x:55,y:65}, e1:{x:45,y:48}, e2:{x:55,y:48} };
               instruction = { text: t('ui.gymUI.huds.heeldrop'), x: 75, y: 70, arrow: "" };
             } else if (type === 'flexion') {
-              s = { c:{x:50,y:25}, cv:{x:50,y:35}, p:{x:50,y:65}, s1:{x:50,y:35}, e1:{x:45,y:50}, w1:{x:45,y:65}, h1:{x:50,y:65}, k1:{x:50,y:80}, a1:{x:45,y:95}, s2:{x:50,y:35}, e2:{x:55,y:50}, w2:{x:55,y:65}, h2:{x:50,y:65}, k2:{x:50,y:80}, a2:{x:55,y:95} };
-              e = { c:{x:40,y:60}, cv:{x:45,y:50}, p:{x:50,y:65}, s1:{x:45,y:50}, e1:{x:40,y:65}, w1:{x:40,y:80}, h1:{x:50,y:65}, k1:{x:50,y:80}, a1:{x:45,y:95}, s2:{x:45,y:50}, e2:{x:45,y:65}, w2:{x:45,y:80}, h2:{x:50,y:65}, k2:{x:50,y:80}, a2:{x:55,y:95} };
-              instruction = { text: t('ui.gymUI.huds.fracture'), x: 75, y: 40, arrow: "" };
+              s = { c:{x:50,y:25}, p:{x:50,y:60}, s1:{x:50,y:33}, e1:{x:45,y:50}, w1:{x:45,y:65}, h1:{x:50,y:60}, k1:{x:50,y:78}, a1:{x:45,y:95}, s2:{x:50,y:33}, e2:{x:55,y:50}, w2:{x:55,y:65}, h2:{x:50,y:60}, k2:{x:50,y:78}, a2:{x:55,y:95} };
+              e = { ...s, c:{x:25,y:60}, p:{x:50,y:60}, s1:{x:30,y:60}, e1:{x:30,y:75}, w1:{x:30,y:90}, h1:{x:50,y:60}, s2:{x:30,y:60}, e2:{x:35,y:75}, w2:{x:35,y:90} };
+              instruction = { text: t('ui.gymUI.huds.fracture'), x: 70, y: 40, arrow: "" };
+            } else if (type === 'situp') {
+              s = { c:{x:20,y:90}, p:{x:60,y:90}, s1:{x:25,y:90}, e1:{x:40,y:85}, w1:{x:55,y:90}, h1:{x:60,y:90}, k1:{x:75,y:70}, a1:{x:90,y:95}, s2:{x:25,y:90}, e2:{x:40,y:85}, w2:{x:55,y:90}, h2:{x:60,y:90}, k2:{x:75,y:70}, a2:{x:90,y:95} };
+              e = { ...s, c:{x:40,y:60}, p:{x:60,y:90}, s1:{x:45,y:65}, e1:{x:55,y:75}, w1:{x:65,y:80}, s2:{x:45,y:65}, e2:{x:55,y:75}, w2:{x:65,y:80} };
+              instruction = { text: t('ui.gymUI.huds.fracture'), x: 40, y: 40, arrow: "" };
             } else if (type === 'hooklying') {
-              s = { c:{x:20,y:90}, cv:{x:30,y:90}, p:{x:65,y:90}, s1:{x:30,y:90}, e1:{x:45,y:92}, w1:{x:55,y:92}, h1:{x:65,y:90}, k1:{x:80,y:70}, a1:{x:95,y:95}, s2:{x:30,y:90}, e2:{x:45,y:88}, w2:{x:55,y:88}, h2:{x:65,y:90}, k2:{x:80,y:70}, a2:{x:95,y:95} };
-              e = { ...s, c:{x:20,y:90}, cv: { x:30, y: 90 - (breath*1.5) }, p: { x:65, y: 90 + (breath*0.5) } }; 
+              const breath = isRest ? Math.sin(Date.now() / 300) * 2 : 0;
+              s = { c:{x:20,y:90}, p:{x:65,y:90}, s1:{x:28,y:90}, e1:{x:45,y:92}, w1:{x:55,y:92}, h1:{x:65,y:90}, k1:{x:80,y:70}, a1:{x:95,y:95}, s2:{x:28,y:90}, e2:{x:45,y:88}, w2:{x:55,y:88}, h2:{x:65,y:90}, k2:{x:80,y:70}, a2:{x:95,y:95} };
+              e = { ...s, c:{x:20,y:90}, p: { x:65, y: 90 + (breath*0.5) } }; 
             }
           } else {
-            s = { 
-              c:{x:50,y:20}, cv:{x:50,y:30}, p:{x:50,y:55},
-              s1:{x:35,y:30}, e1:{x:30,y:45}, w1:{x:35,y:55}, h1:{x:42,y:55}, k1:{x:42,y:75}, a1:{x:42,y:95},
-              s2:{x:65,y:30}, e2:{x:70,y:45}, w2:{x:65,y:55}, h2:{x:58,y:55}, k2:{x:58,y:75}, a2:{x:58,y:95}
-            };
+            // FRONT VIEW COORDINATES
+            s = { c:{x:50,y:20}, p:{x:50,y:50}, s1:{x:35,y:28}, e1:{x:30,y:42}, w1:{x:35,y:55}, h1:{x:42,y:50}, k1:{x:42,y:72}, a1:{x:42,y:95}, s2:{x:65,y:28}, e2:{x:70,y:42}, w2:{x:65,y:55}, h2:{x:58,y:50}, k2:{x:58,y:72}, a2:{x:58,y:95} };
             e = { ...s };
 
             if (type === 'rdl') {
               s = { ...s, w1:{x:35,y:60}, w2:{x:65,y:60} };
-              e = { ...s, c:{x:50,y:35}, cv:{x:50,y:45}, s1:{x:35,y:45}, s2:{x:65,y:45}, w1:{x:35,y:75}, w2:{x:65,y:75} };
+              e = { ...s, c:{x:50,y:35}, p:{x:50,y:55}, s1:{x:35,y:43}, s2:{x:65,y:43}, w1:{x:35,y:75}, w2:{x:65,y:75}, e1:{x:30,y:58}, e2:{x:70,y:58} };
             } else if (type === 'squat') {
               s = { ...s, w1:{x:48,y:40}, w2:{x:52,y:40}, e1:{x:40,y:40}, e2:{x:60,y:40} };
-              e = { ...s, c:{x:50,y:45}, cv:{x:50,y:55}, p:{x:50,y:80}, h1:{x:42,y:80}, h2:{x:58,y:80}, k1:{x:30,y:75}, k2:{x:70,y:75}, s1:{x:35,y:55}, s2:{x:65,y:55}, w1:{x:48,y:60}, w2:{x:52,y:60}, e1:{x:40,y:65}, e2:{x:60,y:65} };
+              e = { ...s, c:{x:50,y:45}, p:{x:50,y:75}, h1:{x:42,y:75}, h2:{x:58,y:75}, k1:{x:30,y:72}, k2:{x:70,y:72}, s1:{x:35,y:53}, s2:{x:65,y:53}, w1:{x:48,y:60}, w2:{x:52,y:60}, e1:{x:40,y:65}, e2:{x:60,y:65} };
             } else if (type === 'overhead') {
-              s = { ...s, c:{x:50,y:30}, cv:{x:50,y:40}, p:{x:50,y:65}, s1:{x:35,y:40}, s2:{x:65,y:40}, h1:{x:42,y:65}, h2:{x:58,y:65}, w1:{x:35,y:40}, w2:{x:65,y:40}, e1:{x:25,y:50}, e2:{x:75,y:50}, k1:{x:42,y:80}, k2:{x:58,y:80}, a1:{x:42,y:95}, a2:{x:58,y:95} };
+              s = { ...s, c:{x:50,y:30}, p:{x:50,y:60}, s1:{x:35,y:38}, s2:{x:65,y:38}, h1:{x:42,y:60}, h2:{x:58,y:60}, w1:{x:35,y:40}, w2:{x:65,y:40}, e1:{x:25,y:50}, e2:{x:75,y:50}, k1:{x:42,y:80}, k2:{x:58,y:80}, a1:{x:42,y:95}, a2:{x:58,y:95} };
               e = { ...s, w1:{x:35,y:10}, w2:{x:65,y:10}, e1:{x:25,y:25}, e2:{x:75,y:25} };
             } else if (type === 'birddog') {
-              s = { c:{x:50,y:60}, cv:{x:50,y:60}, p:{x:50,y:60}, s1:{x:40,y:60}, s2:{x:60,y:60}, h1:{x:42,y:60}, h2:{x:58,y:60}, e1:{x:40,y:75}, e2:{x:60,y:75}, w1:{x:40,y:90}, w2:{x:60,y:90}, k1:{x:42,y:75}, k2:{x:58,y:75}, a1:{x:42,y:90}, a2:{x:58,y:90} };
+              s = { c:{x:50,y:60}, p:{x:50,y:60}, s1:{x:40,y:60}, s2:{x:60,y:60}, h1:{x:42,y:60}, h2:{x:58,y:60}, e1:{x:40,y:75}, e2:{x:60,y:75}, w1:{x:40,y:90}, w2:{x:60,y:90}, k1:{x:42,y:75}, k2:{x:58,y:75}, a1:{x:42,y:90}, a2:{x:58,y:90} };
               e = { ...s, w1:{x:40,y:40}, e1:{x:40,y:50}, k2:{x:70,y:60}, a2:{x:85,y:60} };
             } else if (type === 'impact') {
-              e = { ...s, c:{x:50,y:25}, cv:{x:50,y:35}, p:{x:50,y:60}, s1:{x:35,y:35}, s2:{x:65,y:35}, h1:{x:42,y:60}, h2:{x:58,y:60}, k1:{x:42,y:80}, k2:{x:58,y:80}, w1:{x:35,y:65}, w2:{x:65,y:65} };
+              e = { ...s, c:{x:50,y:25}, p:{x:50,y:55}, s1:{x:35,y:33}, s2:{x:65,y:33}, h1:{x:42,y:55}, h2:{x:58,y:55}, k1:{x:42,y:75}, k2:{x:58,y:75}, w1:{x:35,y:65}, w2:{x:65,y:65}, e1:{x:30,y:48}, e2:{x:70,y:48} };
             } else if (type === 'flexion') {
-              e = { ...s, c:{x:50,y:50}, cv:{x:50,y:50}, p:{x:50,y:65}, s1:{x:35,y:50}, s2:{x:65,y:50}, w1:{x:42,y:70}, w2:{x:58,y:70} };
+              e = { ...s, c:{x:50,y:50}, p:{x:50,y:65}, s1:{x:35,y:50}, s2:{x:65,y:50}, w1:{x:42,y:70}, w2:{x:58,y:70}, e1:{x:35,y:60}, e2:{x:65,y:60} };
+            } else if (type === 'situp') {
+              s = { c:{x:50,y:70}, p:{x:50,y:90}, s1:{x:35,y:75}, s2:{x:65,y:75}, h1:{x:42,y:90}, h2:{x:58,y:90}, k1:{x:42,y:75}, k2:{x:58,y:75}, a1:{x:42,y:95}, a2:{x:58,y:95}, w1:{x:35,y:85}, w2:{x:65,y:85}, e1:{x:30,y:80}, e2:{x:70,y:80} };
+              e = { ...s, c:{x:50,y:50}, s1:{x:35,y:55}, s2:{x:65,y:55}, w1:{x:35,y:65}, w2:{x:65,y:65} };
             } else if (type === 'hooklying') {
-              s = { c:{x:50,y:80}, cv:{x:50,y:80}, p:{x:50,y:80}, s1:{x:35,y:85}, s2:{x:65,y:85}, h1:{x:42,y:85}, h2:{x:58,y:85}, k1:{x:35,y:60}, k2:{x:65,y:60}, a1:{x:35,y:90}, a2:{x:65,y:90}, w1:{x:25,y:90}, w2:{x:75,y:90}, e1:{x:30,y:88}, e2:{x:70,y:88} };
-              e = { ...s, c:{x:50,y:80-(breath*0.5)}, p:{x:50,y:80+(breath*0.5)} };
+              s = { c:{x:50,y:80}, p:{x:50,y:80}, s1:{x:35,y:85}, s2:{x:65,y:85}, h1:{x:42,y:85}, h2:{x:58,y:85}, k1:{x:35,y:60}, k2:{x:65,y:60}, a1:{x:35,y:90}, a2:{x:65,y:90}, w1:{x:25,y:90}, w2:{x:75,y:90}, e1:{x:30,y:88}, e2:{x:70,y:88} };
+              e = { ...s };
             }
           }
 
@@ -318,49 +435,48 @@
             r[key] = { x: lerp(s[key].x, e[key].x, p), y: lerp(s[key].y, e[key].y, p) };
           }
 
-          const isHolding = phaseKey === 'bottom_pause';
-
+          // RENDER MULTI-SEGMENTED SPINE (DASHED)
           const renderSpine = () => {
-            let cp = { x: (r.p.x + r.cv.x)/2, y: (r.p.y + r.cv.y)/2 }; 
-            if (type === 'hooklying' && !isFront) cp = { x: 50, y: 92 }; 
-            if (type === 'birddog' && !isFront) cp = { x: 50, y: 58 }; 
-            if (isFront && type !== 'hooklying' && type !== 'birddog') cp = { x: 50, y: (r.p.y + r.cv.y)/2 };
+            const p1 = r.p, c1 = r.c;
+            const segments = 6;
+            let pathD = `M ${p1.x} ${p1.y}`;
+            let points = [];
+            
+            let cpX = (p1.x + c1.x)/2; let cpY = (p1.y + c1.y)/2;
+            if (isFlexion && !isFront) cpX = p1.x; 
+
+            for(let i=1; i<=segments; i++){
+                const t = i/segments;
+                const ox = Math.pow(1-t, 2)*p1.x + 2*(1-t)*t*cpX + Math.pow(t, 2)*c1.x;
+                const oy = Math.pow(1-t, 2)*p1.y + 2*(1-t)*t*cpY + Math.pow(t, 2)*c1.y;
+                points.push({x:ox, y:oy});
+            }
 
             const spineColor = isFlexion ? "#ef4444" : "#10b981"; 
             const spineClass = isFlexion ? "animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.9)]" : "drop-shadow-[0_0_4px_rgba(16,185,129,0.7)]";
 
             return (
-              <path d={`M ${r.p.x} ${r.p.y} Q ${cp.x} ${cp.y} ${r.cv.x} ${r.cv.y}`} fill="none" stroke={spineColor} strokeWidth={isFront ? "5" : "4"} strokeLinecap="round" strokeDasharray={isFront ? "8 4" : "6 4"} className={spineClass} />
+               <path d={`M ${p1.x} ${p1.y} Q ${cpX} ${cpY} ${c1.x} ${c1.y + (isFront?10:5)}`} fill="none" stroke={spineColor} strokeWidth={isFront ? "5" : "4"} strokeLinecap="round" strokeDasharray="5 5" className={spineClass} />
             );
           };
 
-          const renderMuscleGlow = () => {
-            if (!isHolding && phaseKey !== 'eccentric' && phaseKey !== 'concentric') return null;
-            if (type === 'rdl' || type === 'squat') {
-              return <path d={`M ${r.h1.x} ${r.h1.y} L ${r.k1.x} ${r.k1.y}`} stroke="#f59e0b" strokeWidth="12" opacity={p * 0.4} filter="blur(4px)" />;
-            }
-            return null;
-          };
+          const isHolding = phaseKey === 'bottom_pause';
 
           return (
             <svg viewBox="0 0 100 100" className="w-full h-full bg-[#020617] rounded-t-xl overflow-hidden relative">
               <defs>
-                 <pattern id="labGrid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#0f172a" strokeWidth="0.5"/></pattern>
+                 <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#0f172a" strokeWidth="0.5"/></pattern>
                  <linearGradient id="plateAmbra" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#78350f" /></linearGradient>
                  <linearGradient id="plateGreen" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#10b981" /><stop offset="100%" stopColor="#064e3b" /></linearGradient>
               </defs>
-
-              <rect width="100" height="100" fill="url(#labGrid)" />
+              <rect width="100" height="100" fill="url(#grid)" />
               
               {!isRest && type !== 'hooklying' && (
-                <text x="3" y="8" fill="#334155" fontSize="4" fontFamily="monospace" fontWeight="bold">
-                  LIFTMOR.SYS <tspan fill={isFlexion ? "#ef4444" : "#10b981"}>{isFlexion ? 'DANGER' : 'ACTIVE'}</tspan>
-                </text>
+                <text x="3" y="8" fill="#334155" fontSize="4" fontFamily="monospace" fontWeight="bold">LIFTMOR.SYS <tspan fill={isFlexion ? "#ef4444" : "#10b981"}>{isFlexion ? 'DANGER' : 'ACTIVE'}</tspan></text>
               )}
 
               <g className="transition-all duration-75 ease-linear">
-                {renderMuscleGlow()}
-                
+                {/* BACK LIMBS (SHADOW) */}
                 <g stroke={isFront ? "#f8fafc" : "#334155"} strokeWidth={isFront ? "4" : "3"} strokeLinecap="round" strokeLinejoin="round">
                   <polyline points={`${r.s2.x},${r.s2.y} ${r.e2.x},${r.e2.y} ${r.w2.x},${r.w2.y}`} />
                   <polyline points={`${r.h2.x},${r.h2.y} ${r.k2.x},${r.k2.y} ${r.a2.x},${r.a2.y}`} />
@@ -371,29 +487,21 @@
                   <path d={`M ${r.s1.x} ${r.s1.y} L ${r.s2.x} ${r.s2.y} L ${r.h2.x} ${r.h2.y} L ${r.h1.x} ${r.h1.y} Z`} fill="#1e293b" stroke="#334155" strokeWidth="2" opacity="0.8" />
                 )}
 
+                {/* SPINE */}
                 {renderSpine()}
 
+                {/* SKULL & PELVIS */}
                 <ellipse cx={r.c.x} cy={r.c.y} rx={isFront ? "5" : "4"} ry={isFront ? "6" : "5.5"} fill="#e2e8f0" />
-                <line x1={r.cv.x} y1={r.cv.y} x2={r.c.x} y2={r.c.y + 4} stroke="#cbd5e1" strokeWidth="3.5" strokeLinecap="round" />
                 <circle cx={r.p.x} cy={r.p.y} r="4.5" fill="#94a3b8" />
 
+                {/* FRONT LIMBS (HIGHLIGHT) */}
                 <g stroke={isFlexion && !isFront ? "#ef4444" : "#f8fafc"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points={`${r.s1.x},${r.s1.y} ${r.e1.x},${r.e1.y} ${r.w1.x},${r.w1.y}`} />
                   <polyline points={`${r.h1.x},${r.h1.y} ${r.k1.x},${r.k1.y} ${r.a1.x},${r.a1.y}`} />
                   <line x1={r.a1.x - 2} y1={r.a1.y} x2={r.a1.x + (isFront?2:5)} y2={r.a1.y} strokeWidth="4" />
                 </g>
 
-                {instruction && !isRest && !isFront && (
-                  <g className="animate-in fade-in zoom-in duration-500">
-                     <text x={instruction.x} y={instruction.y} fill={isFlexion ? "#ef4444" : "#38bdf8"} fontSize="4" fontWeight="900" fontFamily="monospace" textAnchor="middle">{instruction.text}</text>
-                     {instruction.arrow && <path d={instruction.arrow} fill="none" stroke={isFlexion ? "#ef4444" : "#38bdf8"} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />}
-                  </g>
-                )}
-
-                {type === 'impact' && p > 0.8 && (
-                  <g className="animate-ping opacity-50"><ellipse cx={r.a1.x} cy={r.a1.y} rx="15" ry="5" fill="none" stroke="#f59e0b" strokeWidth="2" /></g>
-                )}
-
+                {/* EQUIPMENT */}
                 {type === 'rdl' && (
                   <g>
                     <line x1={isFront ? r.w1.x-10 : r.w1.x - 22} y1={r.w1.y} x2={isFront ? r.w2.x+10 : r.w1.x + 22} y2={isFront ? r.w2.y : r.w1.y} stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
@@ -401,7 +509,6 @@
                     <rect x={isFront ? r.w2.x+1 : r.w1.x + 13} y={isFront ? r.w2.y - 14 : r.w1.y - 14} width="7" height="28" fill="url(#plateAmbra)" rx="2" />
                   </g>
                 )}
-                
                 {type === 'overhead' && (
                   <g>
                     <line x1={isFront ? r.w1.x-15 : r.w1.x - 18} y1={r.w1.y} x2={isFront ? r.w2.x+15 : r.w2.x + 18} y2={isFront ? r.w2.y : r.w1.y} stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
@@ -409,12 +516,23 @@
                     <rect x={isFront ? r.w2.x+6 : r.w2.x + 9} y={isFront ? r.w2.y - 12 : r.w2.y - 12} width="6" height="24" fill="url(#plateGreen)" rx="2" />
                   </g>
                 )}
-                
                 {type === 'squat' && (
                   <g>
                     <path d={`M ${(r.w1.x+r.w2.x)/2-5} ${r.w1.y-1} A 5 5 0 0 1 ${(r.w1.x+r.w2.x)/2+5} ${r.w1.y-1}`} fill="none" stroke="#cbd5e1" strokeWidth="2.5" />
-                    <circle cx={(r.w1.x+r.w2.x)/2} cy={r.w1.y + 6} r="7.5" fill="#1e293b" />
+                    <circle cx={(r.w1.x+r.w2.x)/2} cy={r.w1.y + 6} r="7.5" fill="#1e293b" stroke="#334155" strokeWidth="1" />
+                    <path d={`M ${(r.w1.x+r.w2.x)/2} ${r.w1.y + 2} A 4 4 0 0 0 ${(r.w1.x+r.w2.x)/2+3} ${r.w1.y + 8}`} fill="none" stroke="#38bdf8" strokeWidth="1" opacity="0.5" />
                   </g>
+                )}
+
+                {/* HUD INSTRUCTIONS */}
+                {instruction && !isRest && !isFront && (
+                  <g className="animate-in fade-in zoom-in duration-500">
+                     <text x={instruction.x} y={instruction.y} fill={isFlexion ? "#ef4444" : "#38bdf8"} fontSize="4" fontWeight="900" fontFamily="monospace" textAnchor="middle">{instruction.text}</text>
+                     {instruction.arrow && <path d={instruction.arrow} fill="none" stroke={isFlexion ? "#ef4444" : "#38bdf8"} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />}
+                  </g>
+                )}
+                {type === 'impact' && p > 0.8 && (
+                  <g className="animate-ping opacity-50"><ellipse cx={r.a1.x} cy={r.a1.y} rx="15" ry="5" fill="none" stroke="#f59e0b" strokeWidth="2" /></g>
                 )}
               </g>
 
@@ -422,16 +540,16 @@
 
               {isRest && (
                 <g className="animate-in fade-in zoom-in duration-500">
-                   <rect x="20" y="30" width="60" height="30" fill="#020617" opacity="0.9" rx="4" stroke="#38bdf8" />
+                   <rect x="25" y="30" width="50" height="25" fill="#020617" opacity="0.9" rx="4" stroke="#38bdf8" />
                    <text x="50" y="42" fill="#38bdf8" fontSize="5" fontWeight="bold" textAnchor="middle" tracking="wider">{t('ui.gymUI.phases.rest').toUpperCase()}</text>
-                   <text x="50" y="55" fill="#f8fafc" fontSize="12" fontFamily="monospace" fontWeight="900" textAnchor="middle">{Math.ceil(restTimeLeft)}<tspan fontSize="6" fill="#64748b">s</tspan></text>
+                   <text x="50" y="52" fill="#f8fafc" fontSize="10" fontFamily="monospace" fontWeight="900" textAnchor="middle">REST</text>
                 </g>
               )}
             </svg>
           );
         };
 
-        const GymPlayer = ({ item, lang, t }) => {
+        const GymPlayer = ({ item, t }) => {
           const [isPlaying, setIsPlaying] = useState(false);
           const [currentTime, setCurrentTime] = useState(0); 
           const [view, setView] = useState('side');
@@ -440,7 +558,7 @@
 
           const tempoStr = item.tempo || '3-0-1-0';
           const repsStr = item.reps || '5';
-          const restStr = item.rest || '120 Sec';
+          const restStr = item.rest || '120s';
 
           let ecc = 3, p1 = 0, con = 1, p2 = 0;
           let isStatic = false;
@@ -450,6 +568,8 @@
             ecc = parseFloat(parts[0]) || 3; p1 = parseFloat(parts[1]) || 0; con = parseFloat(parts[2]) || 1; p2 = parseFloat(parts[3]) || 0;
           } else if (tempoStr === 'Explosive') {
             ecc = 1; p1 = 0; con = 0.2; p2 = 0.5;
+          } else if (tempoStr === 'Stop') {
+            ecc = 2; p1 = 1; con = 2; p2 = 1; 
           } else {
             isStatic = true;
             ecc = 4; p1 = 0; con = 4; p2 = 0; 
@@ -462,7 +582,7 @@
           
           const repTime = isStatic ? 8 : (ecc + p1 + con + p2);
           const activeTime = repsStr.includes('Min') ? numReps * 60 : numReps * repTime;
-          const totalSetTime = activeTime + restSecs;
+          const totalSetTime = activeTime + restSecs || 10; 
 
           const animate = (timestamp) => {
             if (!lastTimeRef.current) lastTimeRef.current = timestamp;
@@ -498,7 +618,6 @@
           let p = 0;
           let phaseKey = 'ready';
           let currentRepDisplay = 1;
-          let restTimeLeft = 0;
 
           if (currentTime < activeTime) {
              if (isStatic) {
@@ -512,7 +631,7 @@
                 else { p = 0; phaseKey = 'top_pause'; }
              }
           } else {
-             p = 0; phaseKey = 'rest'; currentRepDisplay = numReps; restTimeLeft = totalSetTime - currentTime;
+             p = 0; phaseKey = 'rest'; currentRepDisplay = numReps;
           }
 
           const formatTime = (secs) => {
@@ -531,7 +650,7 @@
           return (
             <div className="w-full mt-4 rounded-xl border border-slate-700 bg-[#020617] overflow-hidden shadow-inner flex flex-col">
               <div className="relative w-full h-56 sm:h-64 border-b border-slate-800">
-                <GymVisuals type={item.visual} progress={p} phaseKey={phaseKey} currentRep={currentRepDisplay} totalReps={numReps} restTimeLeft={restTimeLeft} lang={lang} t={t} view={view} />
+                <GymVisuals type={item.visual} progress={p} phaseKey={phaseKey} view={view} t={t} />
                 
                 <div className={`absolute top-3 right-3 px-3 py-1.5 rounded-lg text-[10px] font-mono border uppercase tracking-wider shadow-lg flex items-center gap-2 backdrop-blur-md transition-colors duration-300
                    ${phaseKey === 'rest' ? 'bg-sky-950/80 text-sky-400 border-sky-900/50' : phaseKey === 'concentric' ? 'bg-emerald-950/80 text-emerald-400 border-emerald-900/50' : phaseKey === 'bottom_pause' ? 'bg-red-950/80 text-red-400 border-red-900/50' : 'bg-amber-950/80 text-amber-500 border-amber-900/50'}`}
@@ -573,17 +692,13 @@
 
         function UnbreakableApp() {
           const { t, lang, setLang } = useI18n('en');
-          
-          const [habitsState, setHabitsState] = useState([
-            { id: 'h1', completed: false, streak: 12 }, { id: 'h2', completed: false, streak: 8 },
-            { id: 'h3', completed: false, streak: 5 }, { id: 'h4', completed: false, streak: 15 }, { id: 'h5', completed: false, streak: 10 }
-          ]);
-
           const [activeTab, setActiveTab] = useState('gym');
-          const [score, setScore] = useState(2450);
-          const [showLevelUp, setShowLevelUp] = useState(false);
           const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
           const dropdownRef = useRef(null);
+
+          const [habitsState, setHabitsState] = useState([
+            { id: 'h0', completed: true }, { id: 'h1', completed: true }, { id: 'h2', completed: false }, { id: 'h3', completed: false }, { id: 'h4', completed: false }
+          ]);
 
           useEffect(() => {
             const handleClickOutside = (event) => { if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsLangDropdownOpen(false); };
@@ -592,6 +707,7 @@
           }, []);
 
           const currentLangObj = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
+          const completedCount = habitsState.filter(h => h.completed).length;
 
           const Header = () => (
             <div className="pt-8 pb-6 px-6 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20">
@@ -620,9 +736,159 @@
             </div>
           );
 
+          const ForgeView = () => {
+            const habitsText = t('habits', []);
+            return (
+              <div className="p-6 space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
+                <div className="bg-slate-900 border border-slate-700 p-5 rounded-2xl shadow-xl">
+                  <div className="flex justify-between items-center mb-3 cursor-pointer">
+                    <h3 className="font-bold text-slate-200 flex items-center gap-2"><Target className="w-5 h-5 text-amber-500"/> {t('ui.forge.guideBtn')}</h3>
+                  </div>
+                  <div className="text-sm text-slate-400 space-y-3 mt-3 pt-3 border-t border-slate-800">
+                     <p className="font-semibold text-slate-300">{t('ui.forge.s1Title')}</p>
+                     <p className="font-semibold text-slate-300">{t('ui.forge.s2Title')}</p>
+                     <p className="font-semibold text-slate-300">{t('ui.forge.s3Title')}</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-inner">
+                   <div className="flex items-center justify-between mb-4">
+                     <div className="flex items-center gap-2"><Activity className="text-amber-500 h-5 w-5" /><span className="text-base font-bold text-white">{t('ui.forge.title')}</span></div>
+                     <span className="text-sm font-bold text-slate-400">{completedCount}/5</span>
+                   </div>
+                   
+                   <div className="w-full h-2 bg-slate-800 rounded-full mb-6 overflow-hidden">
+                     <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500" style={{ width: `${(completedCount/5)*100}%` }}></div>
+                   </div>
+
+                   {completedCount === 5 && (
+                     <div className="mb-6 p-4 bg-emerald-950/30 border border-emerald-900/50 rounded-xl text-emerald-400 text-sm font-medium flex items-start gap-3">
+                       <Check className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                       <p>{t('ui.forge.completedDesc')}</p>
+                     </div>
+                   )}
+
+                   <div className="space-y-3">
+                     {habitsState.map((h, i) => (
+                       <button key={h.id} onClick={() => {
+                          const newH = [...habitsState];
+                          newH[i].completed = !newH[i].completed;
+                          setHabitsState(newH);
+                       }} className={`w-full text-left rounded-2xl p-4 border transition-all duration-300 flex items-center justify-between ${h.completed ? 'bg-amber-500/10 border-amber-500/50' : 'bg-slate-900/50 border-slate-800 hover:border-slate-600'}`}>
+                         <div>
+                           <h3 className={`font-bold text-sm transition-colors ${h.completed ? 'text-amber-500' : 'text-slate-200'}`}>{habitsText[i]?.name || 'Habit'}</h3>
+                           <p className="text-xs text-slate-500 mt-1">{habitsText[i]?.desc || 'Description'}</p>
+                         </div>
+                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${h.completed ? 'bg-amber-500 border-amber-500' : 'border-slate-600'}`}>
+                           {h.completed && <Check className="w-4 h-4 text-slate-950" />}
+                         </div>
+                       </button>
+                     ))}
+                   </div>
+                </div>
+              </div>
+            );
+          };
+
+          const DietView = () => {
+             const [profile, setProfile] = useState('female');
+             const [day, setDay] = useState('mon');
+             const [view, setView] = useState('menu'); // menu or cart
+             const [checkedItems, setCheckedItems] = useState({});
+
+             const toggleCheck = (item) => {
+               setCheckedItems(prev => ({ ...prev, [item]: !prev[item] }));
+             };
+
+             const dietMenu = t(`dietMenu.${profile}.${day}`, {});
+             const cartList = t(`cartItems.${profile}`, []);
+
+             return (
+               <div className="p-6 space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Utensils className="text-amber-500 h-5 w-5" />
+                    <h2 className="text-xl font-bold text-white">{t('ui.dietUI.title')}</h2>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-6">{t('ui.dietUI.desc')}</p>
+
+                  <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-800 shadow-inner mb-6">
+                    {['menu', 'cart'].map((v) => (
+                      <button key={v} onClick={() => setView(v)} className={`flex-1 py-3 text-[11px] font-bold rounded-lg transition-all duration-300 uppercase ${view === v ? 'bg-amber-500 text-slate-900 shadow-md shadow-amber-900/20' : 'text-slate-400 hover:text-slate-200'}`}>
+                        {t(`ui.dietUI.tabs.${v}`)}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2 mb-6 bg-slate-900 p-1.5 rounded-xl border border-slate-800 overflow-x-auto scrollbar-hide">
+                    {['female', 'male', 'vegan'].map((p) => (
+                       <button key={p} onClick={() => setProfile(p)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors whitespace-nowrap ${profile === p ? 'bg-slate-700 text-white' : 'text-slate-400'}`}>
+                         {t(`ui.dietUI.profiles.${p}`)}
+                       </button>
+                    ))}
+                  </div>
+
+                  {view === 'menu' && (
+                    <>
+                      <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide pb-2">
+                        {DIET_DAYS.map((d) => (
+                          <button key={d} onClick={() => setDay(d)} className={`w-12 h-14 flex-shrink-0 flex flex-col items-center justify-center rounded-xl border transition-all ${day === d ? 'bg-amber-500 border-amber-400 text-slate-950 shadow-lg' : 'bg-slate-900 border-slate-800 text-slate-400'}`}>
+                            <span className="text-[10px] font-bold uppercase">{t(`ui.dietUI.days.${d}`)}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="space-y-4">
+                         {['b', 'l', 'd'].map((mealCode, idx) => {
+                           const titles = ['Breakfast', 'Lunch', 'Dinner'];
+                           if(!dietMenu[mealCode]) return null;
+                           return (
+                             <div key={mealCode} className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-md">
+                               <div className="flex items-center gap-3 mb-3">
+                                 <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-amber-500 font-bold text-xs">{idx+1}</div>
+                                 <h4 className="font-bold text-slate-200 uppercase tracking-wider text-sm">{titles[idx]}</h4>
+                               </div>
+                               <p className="text-slate-300 text-sm leading-relaxed pl-11">{dietMenu[mealCode]}</p>
+                             </div>
+                           )
+                         })}
+                      </div>
+                    </>
+                  )}
+
+                  {view === 'cart' && (
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                       <div className="flex justify-between items-center mb-6">
+                         <h3 className="font-bold text-slate-200 flex items-center gap-2"><ShoppingCart className="w-5 h-5 text-amber-500"/> {t('ui.dietUI.tabs.cart')}</h3>
+                         <button onClick={() => setCheckedItems({})} className="flex items-center gap-1.5 text-xs text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-lg font-bold"><RefreshCw className="w-3.5 h-3.5"/> {t('ui.dietUI.reset')}</button>
+                       </div>
+                       
+                       <div className="space-y-3">
+                         {cartList.map((item, idx) => (
+                            <div key={idx} className="relative flex items-center">
+                              <input type="checkbox" id={`cart-${idx}`} className="checkbox-custom absolute opacity-0 w-0 h-0" checked={!!checkedItems[item]} onChange={() => toggleCheck(item)} />
+                              <label htmlFor={`cart-${idx}`} className="flex items-center gap-4 w-full p-3 rounded-xl border border-slate-800 bg-slate-950/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                                <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${checkedItems[item] ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600'}`}>
+                                  <Check className="check-icon hidden w-4 h-4 text-slate-950" strokeWidth={3} />
+                                </div>
+                                <span className="text-content text-sm text-slate-300 font-medium transition-all">{item}</span>
+                              </label>
+                            </div>
+                         ))}
+                       </div>
+                    </div>
+                  )}
+               </div>
+             )
+          }
+
           const GymView = () => {
             const [gymTab, setGymTab] = useState('liftmor');
-            const items = GYM_DATA[gymTab] || [];
+            const itemsText = t(`gymExercises.${gymTab}`, []);
+            const itemsConfig = GYM_CONFIG[gymTab];
+            
+            // Merge localized text with config
+            const items = itemsConfig.map((conf, i) => ({ ...conf, ...itemsText[i] }));
             
             return (
               <div className="p-6 space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -633,7 +899,7 @@
                 <p className="text-xs text-slate-400 mb-6">{t('ui.gymUI.desc')}</p>
 
                 <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-800 mb-6 shadow-inner">
-                  {['daily', 'liftmor', 'redlines'].map((p) => (
+                  {['daily', 'liftmor'].map((p) => (
                     <button key={p} onClick={() => setGymTab(p)} className={`flex-1 py-3 text-[11px] font-bold rounded-lg transition-all duration-300 ${gymTab === p ? 'bg-amber-500 text-slate-900 shadow-md shadow-amber-900/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}>
                       {t(`ui.gymUI.tabs.${p}`)}
                     </button>
@@ -642,43 +908,49 @@
 
                 <div className="space-y-8">
                   {items.map((item, idx) => (
-                    <div key={idx} className={`bg-slate-900 border rounded-3xl p-1 shadow-xl overflow-hidden relative group ${gymTab === 'redlines' ? 'border-red-900/50' : 'border-slate-800'}`}>
+                    <div key={idx} className="bg-slate-900 border rounded-3xl p-1 shadow-xl overflow-hidden relative group border-slate-800">
                       <div className="p-5 relative z-10">
                         <div className="flex gap-4 items-start mb-5">
-                          <div className={`p-3 rounded-2xl bg-slate-950 border shadow-inner flex-shrink-0 ${gymTab === 'redlines' ? 'border-red-900/50' : 'border-slate-700/50'}`}><Activity className="w-5 h-5 text-amber-500"/></div>
+                          <div className="p-3 rounded-2xl bg-slate-950 border shadow-inner flex-shrink-0 border-slate-700/50"><Activity className="w-5 h-5 text-amber-500"/></div>
                           <div className="flex-1">
-                            <h4 className={`text-lg font-black tracking-wide mb-1.5 uppercase ${gymTab === 'redlines' ? 'text-red-500' : 'text-amber-500'}`}>{item.name}</h4>
+                            <h4 className="text-lg font-black tracking-wide mb-1.5 uppercase text-amber-500">{item.name}</h4>
+                            <p className="text-xs text-slate-400">{item.desc}</p>
                           </div>
                         </div>
+
+                        {item.steps && item.steps.length > 0 && (
+                          <div className="mb-6 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+                             <p className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-wider">{t('ui.gymUI.labels.execution')}</p>
+                             <ul className="space-y-2">
+                               {item.steps.map((step, i) => (
+                                 <li key={i} className="text-xs text-slate-300 flex items-start gap-2">
+                                   <span className="text-amber-500 font-bold">{i+1}.</span> {step}
+                                 </li>
+                               ))}
+                             </ul>
+                          </div>
+                        )}
                         
-                        <div className="grid grid-cols-4 gap-2 mb-6">
+                        <div className="grid grid-cols-4 gap-2 mb-4">
                           <MetricBadge label={t('ui.gymUI.labels.sets')} value={item.sets} icon={<Layers/>} />
                           <MetricBadge label={t('ui.gymUI.labels.reps')} value={item.reps} icon={<Repeat/>} />
                           <MetricBadge label={t('ui.gymUI.labels.tempo')} value={item.tempo} icon={<Clock/>} />
                           <MetricBadge label={t('ui.gymUI.labels.rest')} value={item.rest} icon={<Timer/>} />
                         </div>
+                        <div className="grid grid-cols-2 gap-2 mb-6">
+                           <div className="bg-slate-950/50 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between">
+                              <span className="text-[10px] uppercase font-bold text-slate-500">{t('ui.gymUI.labels.focus')}</span>
+                              <span className="text-[11px] font-bold text-amber-500">{item.focus}</span>
+                           </div>
+                           <div className="bg-slate-950/50 border border-slate-800 p-2.5 rounded-xl flex items-center justify-between">
+                              <span className="text-[10px] uppercase font-bold text-slate-500">{t('ui.gymUI.labels.weight')}</span>
+                              <span className="text-[11px] font-bold text-slate-200">{item.weight}</span>
+                           </div>
+                        </div>
                       </div>
-                      <div className="border-t border-slate-800"><GymPlayer item={item} lang={lang} t={t} /></div>
+                      <div className="border-t border-slate-800"><GymPlayer item={item} t={t} /></div>
                     </div>
                   ))}
-                </div>
-              </div>
-            );
-          };
-
-          const ForgeView = () => {
-            const habits = t('habits');
-            return (
-              <div className="p-6 space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                   <div className="flex items-center gap-2 mb-4"><Target className="text-amber-500 h-5 w-5" /><span className="text-base font-bold text-white">{t('ui.forge.title')}</span></div>
-                   <div className="space-y-3">
-                     {habitsState.map((h, i) => (
-                       <div key={h.id} className="w-full text-left rounded-2xl p-4 border bg-slate-900/50 border-slate-800 flex items-center justify-between">
-                         <div><h3 className="font-semibold text-sm text-slate-200">{Array.isArray(habits) ? habits[i]?.name : h.id}</h3></div>
-                       </div>
-                     ))}
-                   </div>
                 </div>
               </div>
             );
@@ -690,15 +962,19 @@
                 <Header />
                 <main className="flex-1">
                   {activeTab === 'forge' && <ForgeView />}
+                  {activeTab === 'diet' && <DietView />}
                   {activeTab === 'gym' && <GymView />}
                 </main>
 
                 <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-4 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-                  <div className="flex justify-between items-center px-1">
-                    <button onClick={() => setActiveTab('forge')} className={`flex flex-col items-center gap-1.5 transition-colors flex-1 ${activeTab === 'forge' ? 'text-amber-500 scale-110' : 'text-slate-500'}`}>
+                  <div className="flex justify-between items-center px-6">
+                    <button onClick={() => setActiveTab('forge')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'forge' ? 'text-amber-500 scale-110' : 'text-slate-500'}`}>
                       <Activity className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.protocol')}</span>
                     </button>
-                    <button onClick={() => setActiveTab('gym')} className={`flex flex-col items-center gap-1.5 transition-colors flex-1 ${activeTab === 'gym' ? 'text-amber-500 scale-110' : 'text-slate-500'}`}>
+                    <button onClick={() => setActiveTab('diet')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'diet' ? 'text-amber-500 scale-110' : 'text-slate-500'}`}>
+                      <Utensils className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.diet')}</span>
+                    </button>
+                    <button onClick={() => setActiveTab('gym')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'gym' ? 'text-amber-500 scale-110' : 'text-slate-500'}`}>
                       <Dumbbell className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.gym')}</span>
                     </button>
                   </div>
