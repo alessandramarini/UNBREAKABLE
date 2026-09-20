@@ -730,15 +730,15 @@
                 </div>
                 
                 {}
-                <div className="flex justify-center items-center gap-3 flex-wrap">
+                <div className="flex justify-center items-center gap-2.5 flex-nowrap w-full overflow-visible py-1">
                   {LANGUAGES.map((language) => (
                     <button 
                       key={language.code} 
                       onClick={() => setLang(language.code)} 
-                      className={`transition-all duration-300 rounded-[3px] overflow-hidden border ${lang === language.code ? 'scale-110 border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] grayscale-0 opacity-100' : 'border-transparent opacity-40 grayscale hover:grayscale-0 hover:opacity-100'}`}
+                      className={`transition-all duration-300 rounded overflow-hidden border-2 flex-shrink-0 ${lang === language.code ? 'scale-125 border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)] z-10' : 'border-transparent hover:scale-110 opacity-90 hover:opacity-100'}`}
                       title={language.label}
                     >
-                      <img src={`https://flagcdn.com/w40/${language.countryCode}.png`} width="24" height="16" alt={language.label} className="block object-cover" />
+                      <img src={`https://flagcdn.com/w40/${language.countryCode}.png`} width="24" height="16" alt={language.label} className="block object-cover w-6 h-4" />
                     </button>
                   ))}
                 </div>
