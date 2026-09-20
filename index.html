@@ -307,10 +307,10 @@
         };
 
         const LANGUAGES = [
-          { code: 'en', flag: '🇬🇧', label: 'English' }, { code: 'it', flag: '🇮🇹', label: 'Italiano' },
-          { code: 'fr', flag: '🇫🇷', label: 'Français' }, { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
-          { code: 'es', flag: '🇪🇸', label: 'Español' }, { code: 'pt', flag: '🇵🇹', label: 'Português' },
-          { code: 'pl', flag: '🇵🇱', label: 'Polski' }, { code: 'ja', flag: '🇯🇵', label: '日本語' }
+          { code: 'en', countryCode: 'gb', label: 'English' }, { code: 'it', countryCode: 'it', label: 'Italiano' },
+          { code: 'fr', countryCode: 'fr', label: 'Français' }, { code: 'de', countryCode: 'de', label: 'Deutsch' },
+          { code: 'es', countryCode: 'es', label: 'Español' }, { code: 'pt', countryCode: 'pt', label: 'Português' },
+          { code: 'pl', countryCode: 'pl', label: 'Polski' }, { code: 'ja', countryCode: 'jp', label: '日本語' }
         ];
 
         function useI18n(initialLang) {
@@ -716,25 +716,29 @@
           const { t, lang, setLang } = useI18n(getBrowserLanguage());
           const [activeTab, setActiveTab] = useState('home');
 
+          const handleTabChange = (tab) => {
+            setActiveTab(tab);
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          };
+
           const Header = () => (
-            <div className="pt-8 pb-4 px-6 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20 shadow-md">
-              <div className="flex flex-col gap-4">
-                <div onClick={() => setActiveTab('home')} className="cursor-pointer active:scale-95 transition-transform flex flex-col items-start">
-                  <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-600 tracking-tighter uppercase">{t('ui.title')}</h1>
-                  <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mt-1">{t('ui.subtitle')}</p>
+            <div className="pt-6 pb-4 px-4 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20 shadow-md">
+              <div className="flex flex-col items-center justify-center gap-3">
+                <div onClick={() => handleTabChange('home')} className="cursor-pointer active:scale-95 transition-transform text-center">
+                  <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-600 tracking-tighter uppercase">{t('ui.title')}</h1>
+                  <p className="text-slate-400 text-[10px] font-medium tracking-widest uppercase mt-0.5">{t('ui.subtitle')}</p>
                 </div>
                 
-                {/* Orizzontal scrollable flags menu */}
-                <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2 items-center">
+                {}
+                <div className="flex justify-center items-center gap-3 flex-wrap">
                   {LANGUAGES.map((language) => (
                     <button 
                       key={language.code} 
                       onClick={() => setLang(language.code)} 
-                      className={`flex flex-col items-center gap-1.5 flex-shrink-0 transition-all ${lang === language.code ? 'scale-110 opacity-100' : 'opacity-40 hover:opacity-100 grayscale hover:grayscale-0'}`}
+                      className={`transition-all duration-300 rounded-[3px] overflow-hidden border ${lang === language.code ? 'scale-110 border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] grayscale-0 opacity-100' : 'border-transparent opacity-40 grayscale hover:grayscale-0 hover:opacity-100'}`}
                       title={language.label}
                     >
-                      <span className="text-2xl drop-shadow-md leading-none">{language.flag}</span>
-                      <span className={`text-[9px] font-bold uppercase tracking-wider ${lang === language.code ? 'text-amber-500' : 'text-slate-500'}`}>{language.code}</span>
+                      <img src={`https://flagcdn.com/w40/${language.countryCode}.png`} width="24" height="16" alt={language.label} className="block object-cover" />
                     </button>
                   ))}
                 </div>
@@ -983,6 +987,7 @@
                   {activeTab === 'manual' && <ManualView />}
                 </main>
 
+                {}
                 <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                   <div className="flex justify-around items-center px-2">
                     
@@ -994,13 +999,13 @@
                       <ShoppingCart className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.shop')}</span>
                     </a>
 
-                    <button onClick={() => setActiveTab('diet')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'diet' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
+                    <button onClick={() => handleTabChange('diet')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'diet' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
                       <Utensils className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.diet')}</span>
                     </button>
-                    <button onClick={() => setActiveTab('gym')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'gym' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
+                    <button onClick={() => handleTabChange('gym')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'gym' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
                       <Dumbbell className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.gym')}</span>
                     </button>
-                    <button onClick={() => setActiveTab('manual')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'manual' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
+                    <button onClick={() => handleTabChange('manual')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'manual' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
                       <BookOpen className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.manual')}</span>
                     </button>
                   </div>
