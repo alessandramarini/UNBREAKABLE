@@ -30,8 +30,8 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
-        // Aggiunto ShoppingCart alle icone
-        import { Activity, Dumbbell, Utensils, BookOpen, Pill, ChevronDown, Check, Info, Target, Globe, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+        // Aggiunto ShoppingCart e ListChecks alle icone
+        import { Activity, Dumbbell, Utensils, BookOpen, Pill, ChevronDown, Check, Info, Target, Globe, ChevronLeft, ChevronRight, ShoppingCart, ListChecks } from 'lucide-react';
         import { initializeApp } from 'firebase/app';
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
         import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -171,7 +171,7 @@
             startJourney: "Commencer le Parcours", startJourneyDesc: "Sélectionnez la phase pour commencer aujourd'hui.",
             loading: "Initialisation...",
             navProtocol: "Protocole", navSupplements: "Suppléments", navDiet: "Régime", navGym: "Gym", navManual: "Manuel",
-            manualTitle: "Manuel Utilisateur", manualDesc: "Conçu pour maximiser vos résultats grâce à une prise correcte.",
+            manualTitle: "Manuel Utilisateur", manualDesc: "Conçu pour maximizar vos résultats grâce à une prise correcte.",
             m1Title: "1. Suivi Quotidien", m1Desc: "Cochez les suppléments pris. Les horaires évitent la compétition gastrique.",
             m2Title: "2. Phases du Protocole", m2Desc: "Le suivi mettra automatiquement à jour les suppléments lors d'un changement de phase.",
             m3Title: "3. Raisonnement Scientifique", m3Desc: "Lisez le 'Pourquoi' derrière chaque supplément.",
@@ -228,7 +228,7 @@
             loading: "Inicializando...",
             navProtocol: "Protocolo", navSupplements: "Suplementos", navDiet: "Dieta", navGym: "Academia", navManual: "O Guia",
             manualTitle: "Manual do Usuário", manualDesc: "Criado para maximizar seus resultados com a ingestão correta.",
-            m1Title: "1. O Rastreador Diário", m1Desc: "Marque os suplementos tomados. Os horários evitam a competição gástrica.",
+            m1Title: "1. O Rastreador Diário", m1Desc: "Marque os suplementos tomados. Os horários evitan a competição gástrica.",
             m2Title: "2. Fases do Protocolo", m2Desc: "O rastreador atualiza os suplementos automaticamente ao mudar de fase.",
             m3Title: "3. Justificativa Científica", m3Desc: "Leia o 'Porquê' no ícone 'i' de cada suplemento.",
             m4Title: "4. Histórico", m4Desc: "Navegue para os dias anteriores.",
@@ -245,7 +245,7 @@
             locale: 'pl-PL',
             appTitle: "UNBREAKABLE", appSubtitle: "Suplementy",
             day: "Dzień", completed: "Ukończono", today: "Dzisiaj", yesterday: "Wczoraj", tomorrow: "Jutro",
-            trackerTab: "Śledzenie", phasesTab: "Fazy", manualTab: "Info",
+            trackerTab: "Śledzenie", phasesTab: "Fases", manualTab: "Info",
             historyWarning: "Przeglądasz historię dla", backToToday: "Wróc do Dzisiaj",
             greatJob: "Świetna robota!", completedAll: "Ukończyłeś dzisiejszy protokół. Twoje ciało Ci dziękuje.",
             morning: "Rano (Śniadanie z tłuszczami)", midday: "W ciągu dnia (Z dala od posiłków)", evening: "Wieczór (Przed snem / Pusty żołądek)",
@@ -676,23 +676,32 @@
 
                 <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                   <div className="flex justify-around items-center px-2">
-                    <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
-                      <Activity className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navProtocol}</span>
-                    </a>
                     
+                    {/* Protocollo (Attivo in questa pagina) */}
                     <button className="flex flex-col items-center gap-1.5 transition-colors text-amber-500 scale-110 cursor-default">
-                      <Pill className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navSupplements}</span>
+                      <ListChecks className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navProtocol}</span>
                     </button>
+                    
+                    {/* Shop (Link Esterno) */}
+                    <a href="https://coral.club/?REF_CODE=224934821522" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
+                      <ShoppingCart className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">Shop</span>
+                    </a>
 
+                    {/* Dieta (Riporta a index.html) */}
                     <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <Utensils className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navDiet}</span>
                     </a>
+                    
+                    {/* Palestra (Riporta a index.html) */}
                     <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <Dumbbell className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navGym}</span>
                     </a>
+                    
+                    {/* Il Libro (Riporta a index.html) */}
                     <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <BookOpen className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navManual}</span>
                     </a>
+
                   </div>
                 </div>
 
