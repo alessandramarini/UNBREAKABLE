@@ -32,7 +32,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { Activity, Dumbbell, ChevronDown, Check, Eye, Layers, Repeat, Clock, Timer, Play, Pause, Utensils, ShoppingCart, RefreshCw, Coffee, Apple, Carrot, UtensilsCrossed, CupSoda, Pill, Target, BookOpen, AlertCircle, Shield, Zap, ChevronRight, Leaf } from 'lucide-react';
+        import { Activity, Dumbbell, ChevronDown, Check, Eye, Layers, Repeat, Clock, Timer, Play, Pause, Utensils, ShoppingCart, RefreshCw, Coffee, Apple, Carrot, UtensilsCrossed, CupSoda, Pill, Target, BookOpen, AlertCircle, Shield, Zap, ChevronRight, Leaf, ListChecks } from 'lucide-react';
 
         const GYM_CONFIG = {
           daily: [
@@ -224,7 +224,7 @@
             },
             habits: [{ name: "Vit D3 + K2", desc: "Absorbiert Kalzium." }, { name: "10-Min Dekompression", desc: "Neutralisiert Schwerkraft." }, { name: "LIFTMOR", desc: "Wolff-Gesetz." }, { name: "Wenig Oxalat", desc: "Nährt Osteoblasten." }, { name: "Magnesium + Kollagen", desc: "Flexible Matrix." }],
             gymExercises: { daily: [{ name: "Dekompression", desc: "Reset.", focus: "Verlängerung", breath: "Zwerchfell", steps: ["Rückenlage.", "Becken neutral.", "Atmen."] }, { name: "Bird-Dog", desc: "Anti-Flexion.", focus: "Stabilität", breath: "Ausatmen", steps: ["Vierfüßler.", "Core.", "Gegenüberliegende strecken."] }], liftmor: [{ name: "RDL", desc: "Hintere Kette.", focus: "Gesäß", breath: "Anspannen", steps: ["Hüfte beugen.", "Rücken neutral.", "Anspannen."] }, { name: "Goblet Squat", desc: "Vertikal.", focus: "Gerade", breath: "Anspannen", steps: ["Gewicht halten.", "Sitzen.", "Drücken."] }, { name: "Overhead", desc: "Axial.", focus: "Lockout", breath: "Ausatmen", steps: ["Core.", "Drücken.", "Locken."] }, { name: "Impacts", desc: "Schock.", focus: "Fersen", breath: "Ausatmen", steps: ["Zehen.", "Hart auf Fersen fallen.", "Steif."] }] },
-            book: [ { title: "1. Die Diagnostische Revolution", icon: "Activity", points: ["DXA ist eine 2D-Illusion; es misst die Menge, ignoriert aber die Architektur.", "Der TBS (Trabecular Bone Score) misst die 3D-Qualität der Knochen.", "Warten Sie nicht 2 Jahre: Verfolgen Sie BTMs (CTX/P1NP) für Feedback in 12 Wochen."] }, { title: "2. Orthomolekulare Ernährung", icon: "Shield", points: ["Kalzium-Paradoxon: Ohne K2 verkalkt Kalzium die Arterien, nicht die Knochen.", "D3 absorbiert Kalzium; K2 (MK-7) lenkt es in das Skelett.", "Kollagen ist die flexible Stahlmatrix für den Kalzium-Beton."] }, { title: "3. Biomechanik & Osteogenese", icon: "Dumbbell", points: ["Wolff-Gesetz: Knochen wachsen nur unter starker mechanischer Belastung.", "LIFTMOR-Protokoll: Schwere Lasten (80% 1RM) + Stoßbelastung.", "Niemals die Wirbelsäule unter Last beugen (keine Sit-ups). Meistern Sie den Hip Hinge."] }, { title: "4. Pharmakologisches Management", icon: "Pill", points: ["Antiresorptiva (Prolia, Bisphosphonate) stoppen den Abbau, bauen aber keinen Knochen auf.", "Prolia Rebound: Ein plötzlicher Stopp verursacht katastrophalen Knochenverlust.", "Verwenden Sie beim Absetzen von Prolia immer eine Staffel-Strategie."] }, { title: "5. Der Endokrine Motor", icon: "Zap", points: ["Östrogen ist die Bremse: Es stoppt die Abbauzellen (Osteoklasten).", "Testosteron ist der Aufbauer: Es stimuliert neue Matrix.", "HRT-Fenster: Bioidentische Hormone innerhalb von 10 Jahren nach der Menopause beginnen."] }, { title: "6. Anabole Pharmakologie", icon: "Target", points: ["Anabolika erzwingen die Schaffung von neuem, massivem Knochen.", "Zeitlich begrenzt: Sie wirken nur 12-24 Monate vor der Anpassung.", "Staffelpflicht: Sie müssen die Gewinne mit einem Antiresorptivum sichern."] }, { title: "7. Die Darm-Knochen-Achse", icon: "Apple", points: ["Mangel an Magensäure (durch Antazida) blockiert die Kalziumaufnahme.", "Stille Zöliakie zerstört Darmzotten und hungert das Skelett aus.", "Heilen Sie den durchlässigen Darm, um Entzündungen zu stoppen."] }, { title: "8. Der Klinische Bauplan", icon: "Check", points: ["CTX Ziel (Abbau): < 300 pg/mL.", "P1NP Ziel (Aufbau): > 45 mcg/L.", "Dosierungen: D3 (50-70 ng/mL), K2 MK-7 (100-200mcg), Kalzium (1200mg), Kollagen (5g)."] }, { title: "9. Männliche Osteoporose", icon: "Activity", points: ["Männer verlieren Knochen durch Testosteronabfall (Andropause).", "Weniger Testosteron bedeutet weniger Östrogen (Bremse ist gelöst).", "Glukokortikoide (Steroide) sind die häufigste sekundäre Ursache."] }, { title: "10. Die 12-Wochen-Herausforderung", icon: "Timer", points: ["Phase 1: Darmaudit, Hip Hinge beherrschen, Basis-BTMs testen.", "Phase 2: Einführung von LIFTMOR-Belastung und Nährstoffen.", "Phase 3: Mechanische Schwelle pushen und BTMs nach 84 Tagen erneut testen."] }, { title: "11. Das Vegane Minenfeld", icon: "Leaf", points: ["Oxalate (Spinat, Mandeln) blockieren Kalzium. Wählen Sie Bok Choy.", "Veganes K2 und D3 (Flechte) sind obligatorisch.", "Protein-Grenze (1.2g/kg) erreichen und Glycin/Prolin aufnehmen."] } ],
+            book: [ { title: "1. Die Diagnostische Revolution", icon: "Activity", points: ["DXA ist eine 2D-Illusion; es misst die Menge, ignoriert aber die Architektur.", "Der TBS (Trabecular Bone Score) misst die 3D-Qualität der Knochen.", "Warten Sie nicht 2 Jahre: Verfolgen Sie BTMs (CTX/P1NP) für Feedback in 12 Wochen."] }, { title: "2. Orthomolekulare Ernährung", icon: "Shield", points: ["Kalzium-Paradoxon: Ohne K2 verkalkt Kalzium die Arterien, nicht die Knochen.", "D3 absorbiert Kalzium; K2 (MK-7) lenkt es in das Skelett.", "Kollagen ist die flexible Stahlmatrix für den Kalzium-Beton."] }, { title: "3. Biomechanik & Osteogenesi", icon: "Dumbbell", points: ["Wolff-Gesetz: Knochen wachsen nur unter starker mechanischer Belastung.", "LIFTMOR-Protokoll: Schwere Lasten (80% 1RM) + Stoßbelastung.", "Niemals die Wirbelsäule unter Last beugen (keine Sit-ups). Meistern Sie den Hip Hinge."] }, { title: "4. Pharmakologisches Management", icon: "Pill", points: ["Antiresorptiva (Prolia, Bisphosphonate) stoppen den Abbau, bauen aber keinen Knochen auf.", "Prolia Rebound: Ein plötzlicher Stopp verursacht katastrophalen Knochenverlust.", "Verwenden Sie beim Absetzen von Prolia immer eine Staffel-Strategie."] }, { title: "5. Der Endokrine Motor", icon: "Zap", points: ["Östrogen ist die Bremse: Es stoppt die Abbauzellen (Osteoklasten).", "Testosteron ist der Aufbauer: Es stimuliert neue Matrix.", "HRT-Fenster: Bioidentische Hormone innerhalb von 10 Jahren nach der Menopause beginnen."] }, { title: "6. Anabole Pharmakologie", icon: "Target", points: ["Anabolika erzwingen die Schaffung von neuem, massivem Knochen.", "Zeitlich begrenzt: Sie wirken nur 12-24 Monate vor der Anpassung.", "Staffelpflicht: Sie müssen die Gewinne mit einem Antiresorptivum sichern."] }, { title: "7. Die Darm-Knochen-Achse", icon: "Apple", points: ["Mangel an Magensäure (durch Antazida) blockiert die Kalziumaufnahme.", "Stille Zöliakie zerstört Darmzotten und hungert das Skelett aus.", "Heilen Sie den durchlässigen Darm, um Entzündungen zu stoppen."] }, { title: "8. Der Klinische Bauplan", icon: "Check", points: ["CTX Ziel (Abbau): < 300 pg/mL.", "P1NP Ziel (Aufbau): > 45 mcg/L.", "Dosierungen: D3 (50-70 ng/mL), K2 MK-7 (100-200mcg), Kalzium (1200mg), Kollagen (5g)."] }, { title: "9. Männliche Osteoporose", icon: "Activity", points: ["Männer verlieren Knochen durch Testosteronabfall (Andropause).", "Weniger Testosteron bedeutet weniger Östrogen (Bremse ist gelöst).", "Glukokortikoide (Steroide) sind die häufigste sekundäre Ursache."] }, { title: "10. Die 12-Wochen-Herausforderung", icon: "Timer", points: ["Phase 1: Darmaudit, Hip Hinge beherrschen, Basis-BTMs testen.", "Phase 2: Einführung von LIFTMOR-Belastung und Nährstoffen.", "Phase 3: Mechanische Schwelle pushen und BTMs nach 84 Tagen erneut testen."] }, { title: "11. Das Vegane Minenfeld", icon: "Leaf", points: ["Oxalate (Spinat, Mandeln) blockieren Kalzium. Wählen Sie Bok Choy.", "Veganes K2 und D3 (Flechte) sind obligatorisch.", "Protein-Grenze (1.2g/kg) erreichen und Glycin/Prolin aufnehmen."] } ],
             dietMenu: {
               female: { mon: { b: "150g Joghurt.", s1: "30g Mandeln.", l: "150g Huhn, 150g Grünkohl.", s2: "1 Ei.", d: "150g Lachs, 100g Brokkoli.", t: "Tee.", sup: "Mag+Col." }, tue: { b: "2 Eier.", s1: "15g Walnüsse.", l: "150g Pute.", s2: "30g Käse.", d: "150g Sardinen.", t: "Tee.", sup: "Mag+Col." }, wed: { b: "150g Hüttenkäse.", s1: "30g Kerne.", l: "150g Hühnersalat.", s2: "1 Ei.", d: "150g Tofu, Spargel.", t: "Tee.", sup: "Mag+Col." }, thu: { b: "150g Joghurt.", s1: "30g Mandeln.", l: "150g Lachs.", s2: "30g Käse.", d: "150g Rind.", t: "Tee.", sup: "Mag+Col." }, fri: { b: "2 Eier.", s1: "15g Walnüsse.", l: "150g Pute.", s2: "1 Ei.", d: "150g Sardinen.", t: "Tee.", sup: "Mag+Col." }, sat: { b: "150g Hüttenkäse.", s1: "30g Kerne.", l: "150g Huhn.", s2: "30g Käse.", d: "150g Lachs.", t: "Tee.", sup: "Mag+Col." }, sun: { b: "150g Joghurt.", s1: "30g Mandeln.", l: "150g Sardinen.", s2: "1 Ei.", d: "150g Tofu.", t: "Tee.", sup: "Mag+Col." } },
               male: { mon: { b: "3 Eier.", s1: "45g Mandeln.", l: "200g Huhn, 150g Grünkohl.", s2: "2 Eier.", d: "200g Steak, 150g Brokkoli.", t: "Tee.", sup: "Mag+Col." }, tue: { b: "200g Joghurt.", s1: "45g Walnüsse.", l: "200g Pute.", s2: "50g Käse.", d: "200g Lachs.", t: "Tee.", sup: "Mag+Col." }, wed: { b: "3 Eier.", s1: "45g Kerne.", l: "200g Sardinen.", s2: "2 Eier.", d: "200g Schwein.", t: "Tee.", sup: "Mag+Col." }, thu: { b: "200g Hüttenkäse.", s1: "45g Mandeln.", l: "200g Huhn.", s2: "50g Käse.", d: "200g Steak.", t: "Tee.", sup: "Mag+Col." }, fri: { b: "3 Eier.", s1: "45g Walnüsse.", l: "200g Pute.", s2: "2 Eier.", d: "200g Lachs.", t: "Tee.", sup: "Mag+Col." }, sat: { b: "200g Joghurt.", s1: "45g Kerne.", l: "200g Sardinen.", s2: "50g Käse.", d: "200g Schwein.", t: "Tee.", sup: "Mag+Col." }, sun: { b: "3 Eier.", s1: "45g Mandeln.", l: "200g Huhn.", s2: "2 Eier.", d: "200g Steak.", t: "Tee.", sup: "Mag+Col." } },
@@ -260,7 +260,7 @@
             },
             habits: [{ name: "Vit D3 + K2", desc: "Absorve cálcio." }, { name: "10-Min Descompressão", desc: "Neutraliza gravidade." }, { name: "LIFTMOR", desc: "Lei de Wolff." }, { name: "Baixo Oxalato", desc: "Absorção." }, { name: "Magnésio + Colágeno", desc: "Matriz." }],
             gymExercises: { daily: [{ name: "Descompressão", desc: "Reset.", focus: "Elongação", breath: "Diafragmática", steps: ["Deitado.", "Pélvis neutra.", "Respirar."] }, { name: "Bird-Dog", desc: "Estabilidade.", focus: "Core", breath: "Exalar", steps: ["De quatro.", "Core.", "Braço/Perna opostos."] }], liftmor: [{ name: "RDL", desc: "Carga posterior.", focus: "Glúteos", breath: "Apertar", steps: ["Dobrar quadris.", "Costas neutras.", "Apertar."] }, { name: "Goblet Squat", desc: "Vertical.", focus: "Reto", breath: "Apertar", steps: ["Peso.", "Sentar.", "Empurrar."] }, { name: "Overhead", desc: "Axial.", focus: "Bloqueio", breath: "Exalar", steps: ["Core.", "Empurrar.", "Bloquear."] }, { name: "Impactos", desc: "Choque.", focus: "Calcanhar", breath: "Exalar", steps: ["Pontas.", "Cair nos calcanhares.", "Rígidas."] }] },
-            book: [ { title: "1. A Revolução Diagnóstica", icon: "Activity", points: ["O DXA (T-Score) é uma ilusão 2D; conta a quantidade, mas ignora a arquitetura.", "O TBS (Trabecular Bone Score) mede a qualidade 3D das pontes ósseas.", "Não espere 2 anos: Monitore os BTMs (CTX/P1NP) para feedback em 12 semanas."] }, { title: "2. Nutrição Ortomolecular", icon: "Shield", points: ["Paradoxo do Cálcio: O cálcio sem K2 calcifica as artérias, não os ossos.", "A D3 absorbe o cálcio; a K2 (MK-7) o direciona para o esqueleto.", "O colágeno é a armadura flexível de aço para o concreto de cálcio."] }, { title: "3. Biomecânica e Osteogênese", icon: "Dumbbell", points: ["Lei de Wolff: Os ossos só crescem sob forte carga mecânica.", "Protocolo LIFTMOR: Resistência pesada (80% 1RM) + Impacto.", "Nunca flexione a coluna sob carga (sem sit-ups). Domine o Hip Hinge."] }, { title: "4. Gestão Farmacológica", icon: "Pill", points: ["Antirreabsortivos (Prolia, Bisfosfonatos) bloqueiam osteoclastos, mas não criam osso.", "Rebote do Prolia: Parar repentinamente causa uma perda óssea catastrófica.", "Sempre use uma estratégia de 'Revezamento' ao interromper o Prolia."] }, { title: "5. O Motor Endócrino", icon: "Zap", points: ["O estrogênio é o freio: interrompe as células destruidoras.", "A testosterona é o construtor: estimula a nova matriz.", "Janela de TRH: Iniciar hormônios bioidênticos em até 10 anos pós-menopausa."] }, { title: "6. Farmacologia Anabólica", icon: "Target", points: ["Os anabólicos forçam a criação de novo osso maciço.", "Tempo limitado: Funcionam apenas de 12 a 24 meses antes da adaptação.", "Revezamento Obrigatório: Você deve fixar os ganhos com um antirreabsortivo."] }, { title: "7. O Eixo Intestino-Osso", icon: "Apple", points: ["A falta de ácido gástrico (por antiácidos) bloqueia a absorção de cálcio.", "A Doença Celíaca silenciosa destrói as vilosidades intestinais.", "Cure o intestino permeável para parar a inflamação."] }, { title: "8. O Plano Clínico", icon: "Check", points: ["Meta CTX (Demolição): < 300 pg/mL.", "Meta P1NP (Construção): > 45 mcg/L.", "Doses: D3 (50-70 ng/mL), K2 MK-7 (100-200mcg), Cálcio (1200mg), Colágeno (5g)."] }, { title: "9. Osteoporose Masculina", icon: "Activity", points: ["Os homens perdem osso pela queda de testosterona (andropausa).", "Menos testosterona = menos estrogênio (freio solto).", "Os esteroides (cortisona) são a principal causa secundária."] }, { title: "10. O Desafio de 12 Semanas", icon: "Timer", points: ["Fase 1: Auditoria intestinal, domínio do Hip Hinge, BTMs base.", "Fase 2: Introdução de cargas LIFTMOR e combustível.", "Fase 3: Empurrar o limite mecânico e retestar aos 84 dias."] }, { title: "11. O Campo Minado Vegano", icon: "Leaf", points: ["Os oxalatos (espinafre, amêndoas) bloqueiam o cálcio. Escolha Bok Choy.", "A K2 vegana e a D3 (Líquen) são obrigatórias.", "Atingir a meta de proteínas (1.2g/kg) e consumir Glicina/Prolina."] } ],
+            book: [ { title: "1. A Revolução Diagnóstica", icon: "Activity", points: ["O DXA (T-Score) é uma ilusão 2D; conta a quantidade, mas ignora a arquitetura.", "O TBS (Trabecular Bone Score) mede a qualidade 3D das pontes ósseas.", "Não espere 2 anos: Monitore os BTMs (CTX/P1NP) para feedback em 12 semanas."] }, { title: "2. Nutrição Ortomolecular", icon: "Shield", points: ["Paradoxo do Cálcio: O cálcio sem K2 calcifica as artérias, não os ossos.", "A D3 absorbe o cálcio; a K2 (MK-7) o direciona para o esqueleto.", "O colágeno é a armadura flexível de aço para o concreto de cálcio."] }, { title: "3. Biomecânica e Osteogênese", icon: "Dumbbell", points: ["Lei de Wolff: Os ossos só crescem sob forte carga mecânica.", "Protocolo LIFTMOR: Resistência pesada (80% 1RM) + Impacto.", "Nunca flexione a coluna sob carga (sem sit-ups). Domine o Hip Hinge."] }, { title: "4. Gestão Farmacológica", icon: "Pill", points: ["Antirreabsortivos (Prolia, Bisfosfonatos) bloqueiam osteoclastos, mas não criam osso.", "Rebote do Prolia: Parar repentinamente causa uma perda óssea catastrófica.", "Sempre use uma estratégia de 'Revezamento' ao interromper o Prolia."] }, { title: "5. O Motor Endócrino", icon: "Zap", points: ["O estrogênio é o freio: interrompe as células destruidoras.", "A testosterona é o construtor: estimula a nova matriz.", "Janela de TRH: Iniciar hormônios bioidênticos em até 10 anos pós-menopausa."] }, { title: "6. Farmacologia Anabólica", icon: "Target", points: ["Os anabólicos forçam a criação de novo osso maciço.", "Tempo limitado: Funcionam apenas de 12 a 24 meses antes da adaptação.", "Revezamento Obrigatório: Você deve fixar os ganhos com um antirreabsortivo."] }, { title: "7. O Eixo Intestino-Osso", icon: "Apple", points: ["A falta de ácido gástrico (por antiácidos) bloquea la absorção de cálcio.", "A Doença Celíaca silenciosa destrói as vilosidades intestinais.", "Cure o intestino permeável para parar a inflamação."] }, { title: "8. O Plano Clínico", icon: "Check", points: ["Meta CTX (Demolição): < 300 pg/mL.", "Meta P1NP (Construção): > 45 mcg/L.", "Doses: D3 (50-70 ng/mL), K2 MK-7 (100-200mcg), Cálcio (1200mg), Colágeno (5g)."] }, { title: "9. Osteoporose Masculina", icon: "Activity", points: ["Os homens perdem osso pela queda de testosterona (andropausa).", "Menos testosterona = menos estrogênio (freio solto).", "Os esteroides (cortisona) são a principal causa secundária."] }, { title: "10. O Desafio de 12 Semanas", icon: "Timer", points: ["Fase 1: Auditoria intestinal, domínio do Hip Hinge, BTMs base.", "Fase 2: Introdução de cargas LIFTMOR e combustível.", "Fase 3: Empurrar o limite mecânico e retestar aos 84 dias."] }, { title: "11. O Campo Minado Vegano", icon: "Leaf", points: ["Os oxalatos (espinafre, amêndoas) bloqueiam o cálcio. Escolha Bok Choy.", "A K2 vegana e a D3 (Líquen) são obrigatórias.", "Atingir a meta de proteínas (1.2g/kg) e consumir Glicina/Prolina."] } ],
             dietMenu: {
               female: { mon: { b: "150g Iogurte.", s1: "30g Amêndoas.", l: "150g Frango, 150g Couve.", s2: "1 Ovo.", d: "150g Salmão, 100g Brócolos.", t: "Chá.", sup: "Mag+Col." }, tue: { b: "2 Ovos.", s1: "15g Nozes.", l: "150g Peru.", s2: "30g Queijo.", d: "150g Sardinhas.", t: "Chá.", sup: "Mag+Col." }, wed: { b: "150g Cottage.", s1: "30g Sementes.", l: "150g Frango.", s2: "1 Ovo.", d: "150g Tofu, Espargos.", t: "Chá.", sup: "Mag+Col." }, thu: { b: "150g Iogurte.", s1: "30g Amêndoas.", l: "150g Salmão.", s2: "30g Queijo.", d: "150g Carne.", t: "Chá.", sup: "Mag+Col." }, fri: { b: "2 Ovos.", s1: "15g Nozes.", l: "150g Peru.", s2: "1 Ovo.", d: "150g Sardinhas.", t: "Chá.", sup: "Mag+Col." }, sat: { b: "150g Cottage.", s1: "30g Sementes.", l: "150g Frango.", s2: "30g Queijo.", d: "150g Salmão.", t: "Chá.", sup: "Mag+Col." }, sun: { b: "150g Iogurte.", s1: "30g Amêndoas.", l: "150g Sardinhas.", s2: "1 Ovo.", d: "150g Tofu.", t: "Chá.", sup: "Mag+Col." } },
               male: { mon: { b: "3 Ovos.", s1: "45g Amêndoas.", l: "200g Frango, 150g Couve.", s2: "2 Ovos.", d: "200g Bife, 150g Brócolos.", t: "Chá.", sup: "Mag+Col." }, tue: { b: "200g Iogurte.", s1: "45g Nozes.", l: "200g Peru.", s2: "50g Queijo.", d: "200g Salmón.", t: "Chá.", sup: "Mag+Col." }, wed: { b: "3 Ovos.", s1: "45g Sementes.", l: "200g Sardinhas.", s2: "2 Ovos.", d: "200g Porco.", t: "Chá.", sup: "Mag+Col." }, thu: { b: "200g Cottage.", s1: "45g Amêndoas.", l: "200g Frango.", s2: "50g Queijo.", d: "200g Bife.", t: "Chá.", sup: "Mag+Col." }, fri: { b: "3 Ovos.", s1: "45g Nozes.", l: "200g Peru.", s2: "2 Ovos.", d: "200g Salmão.", t: "Chá.", sup: "Mag+Col." }, sat: { b: "200g Iogurte.", s1: "45g Sementes.", l: "200g Sardinhas.", s2: "50g Queijo.", d: "200g Porco.", t: "Chá.", sup: "Mag+Col." }, sun: { b: "3 Ovos.", s1: "45g Amêndoas.", l: "200g Frango.", s2: "2 Ovos.", d: "200g Bife.", t: "Chá.", sup: "Mag+Col." } },
@@ -453,7 +453,7 @@
             }
 
             return (
-               <path d={`M ${p1.x} ${p1.y} Q ${cpX} ${cpY} ${c1.x} ${c1.y + (isFront?10:5)}`} fill="none" stroke="#10b981" strokeWidth={isFront ? "5" : "4"} strokeLinecap="round" strokeDasharray="5 5" className="drop-shadow-[0_0_4px_rgba(16,185,129,0.7)]" />
+                <path d={`M ${p1.x} ${p1.y} Q ${cpX} ${cpY} ${c1.x} ${c1.y + (isFront?10:5)}`} fill="none" stroke="#10b981" strokeWidth={isFront ? "5" : "4"} strokeLinecap="round" strokeDasharray="5 5" className="drop-shadow-[0_0_4px_rgba(16,185,129,0.7)]" />
             );
           };
 
@@ -711,10 +711,6 @@
           const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
           const dropdownRef = useRef(null);
 
-          const [habitsState, setHabitsState] = useState([
-            { id: 'h0', completed: true }, { id: 'h1', completed: true }, { id: 'h2', completed: false }, { id: 'h3', completed: false }, { id: 'h4', completed: false }
-          ]);
-
           useEffect(() => {
             const handleClickOutside = (event) => { if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsLangDropdownOpen(false); };
             document.addEventListener('mousedown', handleClickOutside);
@@ -722,7 +718,6 @@
           }, []);
 
           const currentLangObj = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
-          const completedCount = habitsState.filter(h => h.completed).length;
 
           const Header = () => (
             <div className="pt-8 pb-6 px-6 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20">
@@ -750,60 +745,6 @@
               </div>
             </div>
           );
-
-          const ForgeView = () => {
-            const habitsText = t('habits', []);
-            return (
-              <div className="p-6 space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-slate-900 border border-slate-700 p-5 rounded-2xl shadow-xl">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-slate-200 flex items-center gap-2"><Target className="w-5 h-5 text-amber-500"/> {t('ui.forge.guideBtn')}</h3>
-                  </div>
-                  <div className="text-sm text-slate-400 space-y-3 mt-3 pt-3 border-t border-slate-800">
-                     <p><span className="font-semibold text-amber-500">{t('ui.forge.s1Title')}</span><br/>{t('ui.forge.s1Desc')}</p>
-                     <p><span className="font-semibold text-amber-500">{t('ui.forge.s2Title')}</span><br/>{t('ui.forge.s2Desc')}</p>
-                     <p><span className="font-semibold text-amber-500">{t('ui.forge.s3Title')}</span><br/>{t('ui.forge.s3Desc')}</p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-inner">
-                   <div className="flex items-center justify-between mb-4">
-                     <div className="flex items-center gap-2"><Activity className="text-amber-500 h-5 w-5" /><span className="text-base font-bold text-white">{t('ui.forge.title')}</span></div>
-                     <span className="text-sm font-bold text-slate-400">{completedCount}/5</span>
-                   </div>
-                   
-                   <div className="w-full h-2 bg-slate-800 rounded-full mb-6 overflow-hidden">
-                     <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500" style={{ width: `${(completedCount/5)*100}%` }}></div>
-                   </div>
-
-                   {completedCount === 5 && (
-                     <div className="mb-6 p-4 bg-emerald-950/30 border border-emerald-900/50 rounded-xl text-emerald-400 text-sm font-medium flex items-start gap-3">
-                       <Check className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                       <p>{t('ui.forge.completedDesc')}</p>
-                     </div>
-                   )}
-
-                   <div className="space-y-3">
-                     {habitsState.map((h, i) => (
-                       <button key={h.id} onClick={() => {
-                          const newH = [...habitsState];
-                          newH[i].completed = !newH[i].completed;
-                          setHabitsState(newH);
-                        }} className={`w-full text-left rounded-2xl p-4 border transition-all duration-300 flex items-center justify-between ${h.completed ? 'bg-amber-500/10 border-amber-500/50' : 'bg-slate-900/50 border-slate-800 hover:border-slate-600'}`}>
-                          <div>
-                            <h3 className={`font-bold text-sm transition-colors ${h.completed ? 'text-amber-500' : 'text-slate-200'}`}>{habitsText[i]?.name || 'Habit'}</h3>
-                            <p className="text-xs text-slate-500 mt-1">{habitsText[i]?.desc || 'Description'}</p>
-                          </div>
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${h.completed ? 'bg-amber-500 border-amber-500' : 'border-slate-600'}`}>
-                            {h.completed && <Check className="w-4 h-4 text-slate-950" strokeWidth={3} />}
-                          </div>
-                       </button>
-                     ))}
-                   </div>
-                </div>
-              </div>
-            );
-          };
 
           const DietView = () => {
              const [profile, setProfile] = useState('female');
@@ -1028,7 +969,6 @@
               <div className="w-full max-w-md bg-slate-950 relative shadow-2xl overflow-x-hidden min-h-screen flex flex-col">
                 <Header />
                 <main className="flex-1">
-                  {activeTab === 'forge' && <ForgeView />}
                   {activeTab === 'diet' && <DietView />}
                   {activeTab === 'gym' && <GymView />}
                   {activeTab === 'manual' && <ManualView />}
@@ -1036,13 +976,10 @@
 
                 <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                   <div className="flex justify-around items-center px-2">
-                    <button onClick={() => setActiveTab('forge')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'forge' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
-                      <Activity className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.protocol')}</span>
-                    </button>
                     
-                    {/* Pulsante Integrazione che porta al file esterno */}
+                    {/* Pulsante Protocollo (ex Integrazione) che porta al file esterno */}
                     <a href="coral-app.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
-                      <Pill className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.supplements')}</span>
+                      <ListChecks className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t('ui.protocol')}</span>
                     </a>
 
                     <button onClick={() => setActiveTab('diet')} className={`flex flex-col items-center gap-1.5 transition-colors ${activeTab === 'diet' ? 'text-amber-500 scale-110' : 'text-slate-500 hover:text-slate-400'}`}>
