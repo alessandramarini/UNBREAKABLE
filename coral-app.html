@@ -2,7 +2,820 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="vi<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UNBREAKABLE - Supplements</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "lucide-react": "https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0",
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased overflow-x-hidden selection:bg-amber-500/30">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        // Aggiunto ShoppingCart alle icone
+        import { Activity, Dumbbell, Utensils, BookOpen, Pill, ChevronDown, Check, Info, Target, Globe, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+        import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
+
+        let app, auth, db, appId;
+        try {
+          const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+          if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+          }
+        } catch (error) {
+          console.error("Firebase init error:", error);
+        }
+
+        // Funzione per mappare il nome del prodotto all'URL esatto del catalogo
+        const getProductSlug = (name) => {
+          if (name.includes('Coral-Mine')) return 'coral-mine';
+          if (name.includes('H-500')) return 'h-500';
+          if (name.includes('Assimilator')) return 'assimilator';
+          if (name.includes('Enzy-Prime')) return 'enzy-prime';
+          if (name.includes('Lecithin')) return 'coral-lecithin';
+          if (name.includes('Magnesium')) return 'coral-magnesium';
+          if (name.includes('Super-Flora')) return 'super-flora';
+          if (name.includes('B-Luron')) return 'b-luron';
+          if (name.includes('Collagen')) return 'promarine-collagen-peptides';
+          if (name.includes('Calci-Prime')) return 'calci-prime';
+          if (name.includes('D-Spray')) return 'd-spray-2000';
+          // Fallback dinamico in caso di prodotti non mappati
+          return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        };
+
+        // Genera il link con il REF_CODE
+        const getShopLink = (name) => {
+          const slug = getProductSlug(name);
+          return `https://coral.club/shop/${slug}.html?REF_CODE=224934821522`;
+        };
+
+        const translations = {
+          it: {
+            locale: 'it-IT',
+            appTitle: "UNBREAKABLE", appSubtitle: "Supplements",
+            day: "Giorno", completed: "Completato", today: "Oggi", yesterday: "Ieri", tomorrow: "Domani",
+            trackerTab: "Tracker", phasesTab: "Fasi", manualTab: "Info",
+            historyWarning: "Stai guardando lo storico del", backToToday: "Torna ad Oggi",
+            greatJob: "Bravissimo!", completedAll: "Hai completato tutto il protocollo di oggi. Il tuo corpo ringrazia.",
+            morning: "Mattino (Colazione con grassi)", midday: "Metà Giornata (Lontano dai pasti)", evening: "Sera (Pre-nanna / Stomaco vuoto)",
+            theWhy: 'Il "Perché"', startPhase: "Inizia Fase", inProgress: "In Corso", changePhaseWarning: "Sei sicuro di voler cambiare fase? Il conteggio dei giorni ripartirà da 1.",
+            phasesDesc: "Seleziona la tua fase attuale. Cambia fase solo quando hai completato le settimane previste o su indicazione.",
+            yourPhases: "Le Tue Fasi", currentPhaseLabel: "Fase Attuale", objectiveLabel: "Obiettivo:",
+            startJourney: "Inizia il Percorso", startJourneyDesc: "Seleziona la fase del protocollo da cui vuoi partire oggi.",
+            loading: "Inizializzazione Tracker...",
+            navProtocol: "Protocollo", navSupplements: "Integrazione", navDiet: "Dieta", navGym: "Palestra", navManual: "Il Libro",
+            manualTitle: "Manuale d'Uso", manualDesc: "Benvenuto nel Tracker Integrazione. Questa app è progettata per massimizzare i tuoi risultati guidandoti nell'assunzione corretta.",
+            m1Title: "1. Il Tracker Quotidiano", m1Desc: "Usa la scheda 'Tracker' per spuntare gli integratori presi. I momenti della giornata sono studiati per evitare competizioni gastriche (es. mai prendere Calcio e Collagene insieme).",
+            m2Title: "2. Le Fasi del Protocollo", m2Desc: "Nella scheda 'Fasi' puoi avanzare nel tuo percorso. Si parte sempre dalla Fase Detox (per pulire i recettori) prima di passare alla ricarica minerale. Cambiando fase, il tracker aggiornerà automaticamente gli integratori mostrati.",
+            m3Title: "3. Il Razionale Scientifico", m3Desc: "Premi l'icona 'i' (Info) accanto a ciascun integratore per leggere il 'Perché' scientifico dietro quella specifica assunzione.",
+            m4Title: "4. Storico Giorni", m4Desc: "Usa le frecce per navigare nei giorni passati e controllare cosa hai dimenticato.",
+            p0Title: "Fase Preliminare (14 Giorni)", p0Subtitle: "Detox e Drenaggio Profondo", p0Obj: "Pulizia di fegato, intestino e matrice cellulare.", p0Rat: "Un intestino infiammato e un fegato intossicato faticano ad assorbire i nutrienti e convertire la Vitamina D3. Prima di ricostruire, è fondamentale preparare il terreno biologico.", p0A1: "Idratazione con 1.5L di acqua e Coral-Mine.", p0A2: "Detossificazione di fegato e intestino con Assimilator e Lecithin.", p0A3: "Sostegno antiossidante con H-500.",
+            p1Title: "Settimane 1 - 4", p1Subtitle: "Fase di Reset & Saturazione", p1Obj: "Allineamento Intestinale e Saturazione Articolare", p1Rat: "Non ha senso applicare carico meccanico se l'intestino non assorbe e le articolazioni fanno male.", p1A1: "Regolarità assoluta nell'integrazione di D3, Calci-Prime, Magnesio e Collagene.", p1A2: "Utilizzo quotidiano di enzimi, probiotici e B-Luron per spegnere l'infiammazione silente.",
+            p2Title: "Settimane 5 - 8", p2Subtitle: "Fase di Carico (LIFTMOR)", p2Obj: "Introduzione Stimolo Meccanico", p2Rat: "Secondo la Legge di Wolff, l'osso si densifica solo se sottoposto a stress meccanico elevato.", p2A1: "Introduzione di esercizi multiarticolari: 3 set di Stacchi, 3 set di Squat (carico 80% 1RM).", p2A2: "L'impalcatura fornita dal collagene inizia a legarsi al calcio sotto lo stimolo del carico.",
+            p3Title: "Settimane 9 - 12", p3Subtitle: "Fase Anabolica", p3Obj: "Progressione e Verifica BTMs", p3Rat: "I marcatori di turnover osseo (CTX e P1NP) impiegano 8-12 settimane per mostrare la prevalenza della costruzione sulla distruzione ossea.", p3A1: "Mantenimento rigoroso dello stack nutrizionale.", p3A2: "Incremento progressivo dei carichi in allenamento per inviare un segnale anabolico costante.",
+            rGate: "Il Guardiano: Apre i recettori intestinali per permettere l'assorbimento del calcio. Richiede grassi sani.", rCalc: 'Il Vigile: Calcio vegetale (Aquamin) per la durezza, e K2 (MenaQ7) per "dirigerlo" nelle ossa.', rEnz: 'Reset Intestinale: Supporto enzimatico vitale, disgrega i nutrienti per renderli biodisponibili.', rColl: 'Armatura in Acciaio: Struttura flessibile antirottura. Se assunto col calcio crea competizione.', rBlr: 'Abilitatore Biomeccanico: Acido ialuronico e condroitina (lubrificante sistemico). Previene il dolore.', rMag: 'Cofattore Dimenticato: Sinergizza con il calcio per mineralizzare la matrice ossea, favorisce rilassamento.', rFlo: 'Supporto Microbioma: Ripara la parete intestinale e spegne le citochine infiammatorie.',
+            nBreak: "A colazione con grassi sani.", nCalc: "Max 500mg per assunzione.", nMeal: "Al pasto principale.", nColl: "Lontano dai pasti. 2h dal calcio.", nBed: "Prima di dormire, a stomaco vuoto.", noteWithCollagen: "Con Collagene.", noteWithMagnesium: "Con Magnesio.",
+            p0m1Note: "1 bustina in 1.5L. Bere gradualmente.", p0m1Rat: "Alcalinizza e idrata favorendo l'espulsione delle tossine.", p0m2Note: "Al risveglio, con acqua.", p0m2Rat: "Potente antiossidante, neutralizza tossine.", p0m3Note: "A colazione.", p0m3Rat: "Supporta il fegato, vitale per eliminare tossine.", p0m4Rat: "Disgrega tossine metaboliche complesse.", p0s1Note: "Prima di cena.", p0s1Rat: "Sostiene l'azione di spazzino dei radicali liberi.", p0s2Note: "A cena.", p0s2Rat: "De-congestiona il fegato di notte.", p0s3Rat: "Ripopolamento microbioma sano.",
+            w1Name: "Allenamento LIFTMOR", w1Dose: "2x / sett", w1Note: "Stacchi / Squat.", w1Rat: "Legge di Wolff in azione: forza il deposito di calcio.", w2Name: "Allenamento Anabolico", w2Dose: "+1-2 Kg", w2Note: "Aumenta il peso.", w2Rat: "Il sovraccarico progressivo mantiene il segnale anabolico."
+          },
+          en: {
+            locale: 'en-US',
+            appTitle: "UNBREAKABLE", appSubtitle: "Supplements",
+            day: "Day", completed: "Completed", today: "Today", yesterday: "Yesterday", tomorrow: "Tomorrow",
+            trackerTab: "Tracker", phasesTab: "Phases", manualTab: "Info",
+            historyWarning: "You are viewing history for", backToToday: "Back to Today",
+            greatJob: "Great Job!", completedAll: "You've completed today's protocol. Your body thanks you.",
+            morning: "Morning (Breakfast with fats)", midday: "Midday (Away from meals)", evening: "Evening (Pre-sleep / Empty stomach)",
+            theWhy: 'The "Why"', startPhase: "Start Phase", inProgress: "In Progress", changePhaseWarning: "Are you sure you want to change phase? The day count will restart from 1.",
+            phasesDesc: "Select your current phase. Change phase only when you have completed the scheduled weeks.",
+            yourPhases: "Your Phases", currentPhaseLabel: "Current Phase", objectiveLabel: "Objective:",
+            startJourney: "Start the Journey", startJourneyDesc: "Select the protocol phase you want to start from today.",
+            loading: "Initializing Tracker...",
+            navProtocol: "Protocol", navSupplements: "Supplements", navDiet: "Diet", navGym: "Gym", navManual: "The Book",
+            manualTitle: "User Manual", manualDesc: "Welcome to the Supplements Tracker. Designed to maximize your results through proper intake.",
+            m1Title: "1. The Daily Tracker", m1Desc: "Use the 'Tracker' tab to check off taken supplements. Timings avoid gastric competition.",
+            m2Title: "2. Protocol Phases", m2Desc: "In 'Phases' you can advance your journey. Tracker updates supplements automatically.",
+            m3Title: "3. Scientific Rationale", m3Desc: "Press the 'i' icon next to each supplement to read the 'Why'.",
+            m4Title: "4. Days History", m4Desc: "Navigate past days to check what you might have forgotten.",
+            p0Title: "Preliminary Phase (14 Days)", p0Subtitle: "Detox & Deep Drainage", p0Obj: "Liver, intestine, and matrix cleansing.", p0Rat: "An inflamed intestine struggles to absorb nutrients. Prepare the biological terrain.", p0A1: "Hydration with 1.5L of water and Coral-Mine.", p0A2: "Liver/intestine detox with Assimilator and Lecithin.", p0A3: "Antioxidant support with H-500.",
+            p1Title: "Weeks 1 - 4", p1Subtitle: "Reset & Saturation Phase", p1Obj: "Intestinal Alignment & Joint Saturation", p1Rat: "No sense applying load if joints hurt.", p1A1: "Absolute regularity in D3, Calci-Prime, Magnesium, Collagen.", p1A2: "Enzymes, probiotics, and B-Luron for silent inflammation.",
+            p2Title: "Weeks 5 - 8", p2Subtitle: "Loading Phase (LIFTMOR)", p2Obj: "Mechanical Stimulus Introduction", p2Rat: "Wolff's Law: bone densifies under high stress.", p2A1: "Multi-joint exercises: Deadlifts, Squats.", p2A2: "Collagen scaffolding binds with calcium.",
+            p3Title: "Weeks 9 - 12", p3Subtitle: "Anabolic Phase", p3Obj: "Progression & BTMs Verification", p3Rat: "Markers take 8-12 weeks to show bone building.", p3A1: "Strict maintenance of stack.", p3A2: "Progressive load increase.",
+            rGate: "The Gatekeeper: Opens receptors allowing calcium absorption. Requires fats.", rCalc: 'The Traffic Cop: Plant Calcium for hardness, K2 to direct it.', rEnz: 'Gut Reset: Vital enzymatic support for bioavailability.', rColl: 'Steel Armor: Flexible anti-break structure. Avoid calcium competition.', rBlr: 'Biomechanical Enabler: Hyaluronic acid & chondroitin (lubricant).', rMag: 'Forgotten Co-Factor: Synergizes with calcium to mineralize matrix.', rFlo: 'Microbiome Support: Repairs intestinal wall, turns off cytokines.',
+            nBreak: "At breakfast with healthy fats.", nCalc: "Max 500mg per dose.", nMeal: "With main meal.", nColl: "Away from meals. 2h from calcium.", nBed: "Before sleeping, empty stomach.", noteWithCollagen: "With Collagen.", noteWithMagnesium: "With Magnesium.",
+            p0m1Note: "1 sachet in 1.5L. Drink gradually.", p0m1Rat: "Hydrates and aids toxin expulsion.", p0m2Note: "Upon waking, with water.", p0m2Rat: "Potent antioxidant.", p0m3Note: "With breakfast.", p0m3Rat: "Supports liver function.", p0m4Rat: "Breaks down metabolic toxins.", p0s1Note: "Before dinner.", p0s1Rat: "Free radical scavenger.", p0s2Note: "With dinner.", p0s2Rat: "De-congests liver at night.", p0s3Rat: "Microbiome repopulation.",
+            w1Name: "LIFTMOR Training", w1Dose: "2x / week", w1Note: "Deadlifts / Squats.", w1Rat: "Wolff's Law: forces calcium deposit.", w2Name: "Anabolic Training", w2Dose: "+1-2 Kg", w2Note: "Increase weight.", w2Rat: "Progressive overload keeps anabolic signal active."
+          },
+          es: {
+            locale: 'es-ES',
+            appTitle: "UNBREAKABLE", appSubtitle: "Suplementos",
+            day: "Día", completed: "Completado", today: "Hoy", yesterday: "Ayer", tomorrow: "Mañana",
+            trackerTab: "Rastreador", phasesTab: "Fases", manualTab: "Info",
+            historyWarning: "Estás viendo el historial del", backToToday: "Volver a Hoy",
+            greatJob: "¡Excelente!", completedAll: "Has completado el protocolo de hoy. Tu cuerpo lo agradece.",
+            morning: "Mañana (Desayuno con grasas)", midday: "Mediodía (Lejos de comidas)", evening: "Noche (Estómago vacío)",
+            theWhy: 'El "Porqué"', startPhase: "Iniciar Fase", inProgress: "En Curso", changePhaseWarning: "¿Seguro que deseas cambiar de fase? El conteo reiniciará desde 1.",
+            phasesDesc: "Selecciona tu fase actual. Cambia de fase solo cuando hayas completado las semanas.",
+            yourPhases: "Tus Fases", currentPhaseLabel: "Fase Actual", objectiveLabel: "Objetivo:",
+            startJourney: "Inicia el Camino", startJourneyDesc: "Selecciona la fase desde la cual deseas comenzar.",
+            loading: "Inicializando...",
+            navProtocol: "Protocolo", navSupplements: "Suplementos", navDiet: "Dieta", navGym: "Gimnasio", navManual: "Manual",
+            manualTitle: "Manual de Usuario", manualDesc: "App diseñada para maximizar tus resultados mediante la ingesta correcta.",
+            m1Title: "1. Rastreador Diario", m1Desc: "Usa la pestaña para marcar suplementos. Los horarios evitan la competencia gástrica.",
+            m2Title: "2. Fases del Protocolo", m2Desc: "El rastreador actualizará automáticamente los suplementos al cambiar de fase.",
+            m3Title: "3. El Razonamiento Científico", m3Desc: "Presiona el ícono 'i' para leer el 'Porqué'.",
+            m4Title: "4. Historial", m4Desc: "Usa las flechas para navegar por días pasados.",
+            p0Title: "Fase Preliminar (14 Días)", p0Subtitle: "Detox y Drenaje", p0Obj: "Limpieza de hígado e intestino.", p0Rat: "Un intestino inflamado no absorbe nutrientes. Hay que preparar el terreno.", p0A1: "Hidratación con 1.5L de agua y Coral-Mine.", p0A2: "Detox de hígado con Assimilator y Lecithin.", p0A3: "Apoyo antioxidante con H-500.",
+            p1Title: "Semanas 1 - 4", p1Subtitle: "Reinicio y Saturación", p1Obj: "Alineación Intestinal y Articular", p1Rat: "No tiene sentido aplicar carga si el intestino no absorbe.", p1A1: "Regularidad en D3, Calci-Prime, Magnesio y Colágeno.", p1A2: "Enzimas y B-Luron para inflamación.",
+            p2Title: "Semanas 5 - 8", p2Subtitle: "Fase de Carga (LIFTMOR)", p2Obj: "Introducción al Estímulo Mecánico", p2Rat: "Ley de Wolff: el hueso se densifica bajo estrés.", p2A1: "Ejercicios: Peso Muerto y Sentadillas.", p2A2: "El colágeno se une al calcio.",
+            p3Title: "Semanas 9 - 12", p3Subtitle: "Fase Anabólica", p3Obj: "Progresión", p3Rat: "Los marcadores tardan 8-12 semanas en mostrar construcción.", p3A1: "Mantenimiento estricto.", p3A2: "Incremento progresivo de cargas.",
+            rGate: "El Guardián: Abre receptores permitiendo absorción de calcio. Requiere grasas.", rCalc: 'El Policía: Calcio para dureza, K2 para dirigirlo al hueso.', rEnz: 'Reset Intestinal: Apoyo enzimático para biodisponibilidad.', rColl: 'Armadura: Estructura flexible anti-rotura. Evitar con calcio.', rBlr: 'Habilitador Biomecánico: Lubricante sistémico.', rMag: 'El Cofactor: Sinergia con el calcio para mineralizar la matriz.', rFlo: 'Microbioma: Repara la pared intestinal, apaga citocinas.',
+            nBreak: "En desayuno con grasas.", nCalc: "Max 500mg por dosis.", nMeal: "Con comida principal.", nColl: "Lejos de comidas. 2h del calcio.", nBed: "Antes de dormir, vacío.", noteWithCollagen: "Con Colágeno.", noteWithMagnesium: "Con Magnesio.",
+            p0m1Note: "1 sobre en 1.5L. Beber gradual.", p0m1Rat: "Hidrata y ayuda a expulsar toxinas.", p0m2Note: "Al despertar, con agua.", p0m2Rat: "Potente antioxidante.", p0m3Note: "Con el desayuno.", p0m3Rat: "Apoya la función hepática.", p0m4Rat: "Descompone toxinas metabólicas.", p0s1Note: "Antes de cenar.", p0s1Rat: "Eliminador de radicales libres.", p0s2Note: "Con la cena.", p0s2Rat: "Descongestiona el hígado.", p0s3Rat: "Repoblación del microbioma.",
+            w1Name: "Entrenamiento LIFTMOR", w1Dose: "2x / sem", w1Note: "Peso muerto/Sentadillas.", w1Rat: "Fuerza el depósito de calcio.", w2Name: "Entrenamiento Anabólico", w2Dose: "+1-2 Kg", w2Note: "Aumentar peso.", w2Rat: "La sobrecarga mantiene señal anabólica activa."
+          },
+          fr: {
+            locale: 'fr-FR',
+            appTitle: "UNBREAKABLE", appSubtitle: "Suppléments",
+            day: "Jour", completed: "Terminé", today: "Aujourd'hui", yesterday: "Hier", tomorrow: "Demain",
+            trackerTab: "Suivi", phasesTab: "Phases", manualTab: "Info",
+            historyWarning: "Vous consultez l'historique du", backToToday: "Retour à Aujourd'hui",
+            greatJob: "Excellent !", completedAll: "Vous avez terminé le protocole du jour. Votre corps vous remercie.",
+            morning: "Matin (Petit-déjeuner avec graisses)", midday: "Midi (Loin des repas)", evening: "Soir (À jeun)",
+            theWhy: 'Le "Pourquoi"', startPhase: "Démarrer la Phase", inProgress: "En Cours", changePhaseWarning: "Sûr de vouloir changer de phase ? Le compteur recommencera à 1.",
+            phasesDesc: "Sélectionnez votre phase actuelle. Changez uniquement lorsque vous avez terminé les semaines prévues.",
+            yourPhases: "Vos Phases", currentPhaseLabel: "Phase Actuelle", objectiveLabel: "Objectif :",
+            startJourney: "Commencer le Parcours", startJourneyDesc: "Sélectionnez la phase pour commencer aujourd'hui.",
+            loading: "Initialisation...",
+            navProtocol: "Protocole", navSupplements: "Suppléments", navDiet: "Régime", navGym: "Gym", navManual: "Manuel",
+            manualTitle: "Manuel Utilisateur", manualDesc: "Conçu pour maximiser vos résultats grâce à une prise correcte.",
+            m1Title: "1. Suivi Quotidien", m1Desc: "Cochez les suppléments pris. Les horaires évitent la compétition gastrique.",
+            m2Title: "2. Phases du Protocole", m2Desc: "Le suivi mettra automatiquement à jour les suppléments lors d'un changement de phase.",
+            m3Title: "3. Raisonnement Scientifique", m3Desc: "Lisez le 'Pourquoi' derrière chaque supplément.",
+            m4Title: "4. Historique", m4Desc: "Naviguez dans le passé pour vérifier les oublis.",
+            p0Title: "Phase Préliminaire (14 Jours)", p0Subtitle: "Détox et Drainage", p0Obj: "Nettoyage du foie et des intestins.", p0Rat: "Un intestin enflammé n'absorbe pas les nutriments.", p0A1: "Hydratation avec 1,5L et Coral-Mine.", p0A2: "Détox avec Assimilator et Lecithin.", p0A3: "Soutien antioxydant H-500.",
+            p1Title: "Semaines 1 - 4", p1Subtitle: "Phase de Réinitialisation", p1Obj: "Alignement Intestinal et Articulaire", p1Rat: "Aucun sens d'appliquer une charge si les articulations font mal.", p1A1: "Régularité : D3, Calcium, Magnésium, Collagène.", p1A2: "Enzymes et probiotiques contre l'inflammation.",
+            p2Title: "Semaines 5 - 8", p2Subtitle: "Phase de Charge (LIFTMOR)", p2Obj: "Introduction du Stimulus Mécanique", p2Rat: "Loi de Wolff : l'os se densifie sous la contrainte.", p2A1: "Soulevé de terre, Squats.", p2A2: "L'échafaudage de collagène se lie au calcium.",
+            p3Title: "Semaines 9 - 12", p3Subtitle: "Phase Anabolique", p3Obj: "Progression et Vérification", p3Rat: "Les marqueurs prennent 8-12 semaines pour montrer la construction.", p3A1: "Maintien strict.", p3A2: "Augmentation des charges.",
+            rGate: "Le Gardien : Ouvre les récepteurs pour l'absorption du calcium. Nécessite des graisses.", rCalc: 'Le Policier : Calcium végétal pour la dureté, K2 pour la direction.', rEnz: 'Reset Intestinal : Soutien enzymatique pour la biodisponibilité.', rColl: 'Armure d\'Acier : Structure anti-casse. Éviter avec le calcium.', rBlr: 'Lubrifiant Biomécanique : Acide hyaluronique.', rMag: 'Le Cofacteur : Synergise avec le calcium pour minéraliser.', rFlo: 'Microbiome : Répare la paroi intestinale, éteint l\'inflammation.',
+            nBreak: "Au petit-déjeuner avec graisses.", nCalc: "Max 500mg par prise.", nMeal: "Au repas principal.", nColl: "Loin des repas. 2h du calcium.", nBed: "Avant de dormir, à jeun.", noteWithCollagen: "Avec Collagène.", noteWithMagnesium: "Avec Magnésium.",
+            p0m1Note: "1 sachet dans 1,5L. Boire graduellement.", p0m1Rat: "Hydrate et expulse les toxines.", p0m2Note: "Au réveil, avec de l'eau.", p0m2Rat: "Antioxydant puissant.", p0m3Note: "Au petit-déjeuner.", p0m3Rat: "Soutient le foie.", p0m4Rat: "Décompose les toxines métaboliques.", p0s1Note: "Avant le dîner.", p0s1Rat: "Élimine les radicaux libres.", p0s2Note: "Au dîner.", p0s2Rat: "Décongestionne le foie la nuit.", p0s3Rat: "Repeuplement du microbiome.",
+            w1Name: "Entraînement LIFTMOR", w1Dose: "2x / sem", w1Note: "Soulevé de terre / Squats.", w1Rat: "Force le dépôt de calcium.", w2Name: "Entraînement Anabolique", w2Dose: "+1-2 Kg", w2Note: "Augmenter le poids.", w2Rat: "La surcharge progressive maintient le signal anabolique."
+          },
+          de: {
+            locale: 'de-DE',
+            appTitle: "UNBREAKABLE", appSubtitle: "Nahrungsergänzung",
+            day: "Tag", completed: "Abgeschlossen", today: "Heute", yesterday: "Gestern", tomorrow: "Morgen",
+            trackerTab: "Tracker", phasesTab: "Phasen", manualTab: "Info",
+            historyWarning: "Sie betrachten den Verlauf vom", backToToday: "Zurück zu Heute",
+            greatJob: "Großartig!", completedAll: "Sie haben das heutige Protokoll abgeschlossen. Ihr Körper dankt Ihnen.",
+            morning: "Morgens (Frühstück mit Fetten)", midday: "Mittags (Fernab von Mahlzeiten)", evening: "Abends (Vor dem Schlafen / Nüchtern)",
+            theWhy: 'Das "Warum"', startPhase: "Phase Starten", inProgress: "In Bearbeitung", changePhaseWarning: "Möchten Sie die Phase wirklich wechseln? Die Tageszählung beginnt bei 1.",
+            phasesDesc: "Wählen Sie Ihre aktuelle Phase. Wechseln Sie nur nach Abschluss der geplanten Wochen.",
+            yourPhases: "Ihre Phasen", currentPhaseLabel: "Aktuelle Phase", objectiveLabel: "Ziel:",
+            startJourney: "Reise Beginnen", startJourneyDesc: "Wählen Sie die Protokollphase aus, mit der Sie heute beginnen möchten.",
+            loading: "Initialisierung...",
+            navProtocol: "Protokoll", navSupplements: "Ergänzungen", navDiet: "Diät", navGym: "Fitness", navManual: "Handbuch",
+            manualTitle: "Benutzerhandbuch", manualDesc: "Maximieren Sie Ihre Ergebnisse durch korrekte Einnahme.",
+            m1Title: "1. Der tägliche Tracker", m1Desc: "Kreuzen Sie die eingenommenen Ergänzungen an. Die Zeiten verhindern Magenkonkurrenz.",
+            m2Title: "2. Protokollphasen", m2Desc: "Der Tracker aktualisiert die Ergänzungen beim Phasenwechsel automatisch.",
+            m3Title: "3. Wissenschaftlicher Hintergrund", m3Desc: "Drücken Sie 'i', um das 'Warum' zu lesen.",
+            m4Title: "4. Historie", m4Desc: "Navigieren Sie durch vergangene Tage.",
+            p0Title: "Vorläufige Phase (14 Tage)", p0Subtitle: "Detox & Tiefe Drainage", p0Obj: "Reinigung von Leber und Darm.", p0Rat: "Ein entzündeter Darm absorbiert keine Nährstoffe.", p0A1: "Flüssigkeit: 1,5L Wasser und Coral-Mine.", p0A2: "Leber-Detox mit Assimilator und Lecithin.", p0A3: "Antioxidative Unterstützung mit H-500.",
+            p1Title: "Wochen 1 - 4", p1Subtitle: "Reset & Sättigungsphase", p1Obj: "Darmausrichtung & Gelenksättigung", p1Rat: "Es macht keinen Sinn, Belastung auszuüben, wenn die Gelenke schmerzen.", p1A1: "Regelmäßige D3, Calcium, Magnesium, Kollagen-Einnahme.", p1A2: "Enzyme und Probiotika gegen Entzündungen.",
+            p2Title: "Wochen 5 - 8", p2Subtitle: "Ladephase (LIFTMOR)", p2Obj: "Einführung Mechanischer Reize", p2Rat: "Wolffsches Gesetz: Knochen verdichten sich unter Belastung.", p2A1: "Mehrgelenksübungen: Kreuzheben, Kniebeugen.", p2A2: "Kollagengerüst bindet sich mit Calcium.",
+            p3Title: "Wochen 9 - 12", p3Subtitle: "Anabole Phase", p3Obj: "Progression", p3Rat: "Marker benötigen 8-12 Wochen, um den Aufbau zu zeigen.", p3A1: "Strikte Beibehaltung der Ergänzungen.", p3A2: "Stetige Erhöhung der Trainingsgewichte.",
+            rGate: "Der Wächter: Öffnet Rezeptoren für Calciumaufnahme. Benötigt Fette.", rCalc: 'Der Polizist: Pflanzliches Calcium (Härte), K2 lenkt es.', rEnz: 'Darm-Reset: Enzymatische Unterstützung für Bioverfügbarkeit.', rColl: 'Stahlrüstung: Flexible Anti-Bruch-Struktur. Nicht mit Calcium.', rBlr: 'Biomechanischer Schmierstoff: Hyaluronsäure.', rMag: 'Der Co-Faktor: Synergiert mit Calcium zur Knochenmineralisierung.', rFlo: 'Mikrobiom: Repariert die Darmwand, stoppt Zytokine.',
+            nBreak: "Zum Frühstück mit gesunden Fetten.", nCalc: "Max 500mg pro Dosis.", nMeal: "Zur Hauptmahlzeit.", nColl: "Fernab von Mahlzeiten. 2h nach Calcium.", nBed: "Vor dem Schlafen, nüchtern.", noteWithCollagen: "Mit Kollagen.", noteWithMagnesium: "Mit Magnesium.",
+            p0m1Note: "1 Beutel in 1,5L. Allmählich trinken.", p0m1Rat: "Spendet Feuchtigkeit, treibt Toxine aus.", p0m2Note: "Nach dem Aufwachen, mit Wasser.", p0m2Rat: "Starkes Antioxidans.", p0m3Note: "Zum Frühstück.", p0m3Rat: "Unterstützt die Leber.", p0m4Rat: "Baut Stoffwechselgifte ab.", p0s1Note: "Vor dem Abendessen.", p0s1Rat: "Radikalfänger.", p0s2Note: "Zum Abendessen.", p0s2Rat: "Entlastet die Leber nachts.", p0s3Rat: "Wiederaufbau des Mikrobioms.",
+            w1Name: "LIFTMOR Training", w1Dose: "2x / Woche", w1Note: "Kreuzheben / Kniebeugen.", w1Rat: "Erzwingt Calciumablagerung.", w2Name: "Anaboles Training", w2Dose: "+1-2 Kg", w2Note: "Gewicht erhöhen.", w2Rat: "Progressive Überlastung hält das anabole Signal aktiv."
+          },
+          pt: {
+            locale: 'pt-BR',
+            appTitle: "UNBREAKABLE", appSubtitle: "Suplementos",
+            day: "Dia", completed: "Concluído", today: "Hoje", yesterday: "Ontem", tomorrow: "Amanhã",
+            trackerTab: "Rastreador", phasesTab: "Fases", manualTab: "Info",
+            historyWarning: "Você está vendo o histórico de", backToToday: "Voltar para Hoje",
+            greatJob: "Excelente!", completedAll: "Você completou o protocolo de hoje. Seu corpo agradece.",
+            morning: "Manhã (Café da manhã com gorduras)", midday: "Meio-dia (Longe das refeições)", evening: "Noite (Estômago vazio)",
+            theWhy: 'O "Porquê"', startPhase: "Iniciar Fase", inProgress: "Em Andamento", changePhaseWarning: "Tem certeza de que deseja mudar de fase? A contagem reiniciará de 1.",
+            phasesDesc: "Selecione a fase atual. Mude apenas ao concluir as semanas programadas.",
+            yourPhases: "Suas Fases", currentPhaseLabel: "Fase Atual", objectiveLabel: "Objetivo:",
+            startJourney: "Iniciar a Jornada", startJourneyDesc: "Selecione a fase do protocolo para começar hoje.",
+            loading: "Inicializando...",
+            navProtocol: "Protocolo", navSupplements: "Suplementos", navDiet: "Dieta", navGym: "Academia", navManual: "O Guia",
+            manualTitle: "Manual do Usuário", manualDesc: "Criado para maximizar seus resultados com a ingestão correta.",
+            m1Title: "1. O Rastreador Diário", m1Desc: "Marque os suplementos tomados. Os horários evitam a competição gástrica.",
+            m2Title: "2. Fases do Protocolo", m2Desc: "O rastreador atualiza os suplementos automaticamente ao mudar de fase.",
+            m3Title: "3. Justificativa Científica", m3Desc: "Leia o 'Porquê' no ícone 'i' de cada suplemento.",
+            m4Title: "4. Histórico", m4Desc: "Navegue para os dias anteriores.",
+            p0Title: "Fase Preliminar (14 Dias)", p0Subtitle: "Detox e Drenagem", p0Obj: "Limpeza do fígado e intestino.", p0Rat: "Um intestino inflamado não absorve nutrientes.", p0A1: "Hidratação com 1.5L e Coral-Mine.", p0A2: "Detox hepático com Assimilator e Lecithin.", p0A3: "Apoio antioxidante (H-500).",
+            p1Title: "Semanas 1 - 4", p1Subtitle: "Fase de Reset", p1Obj: "Alinhamento Intestinal e Articular", p1Rat: "Não faz sentido aplicar carga se as articulações doem.", p1A1: "D3, Calci-Prime, Magnésio e Colágeno regulares.", p1A2: "Enzimas e B-Luron para inflamação silente.",
+            p2Title: "Semanas 5 - 8", p2Subtitle: "Fase de Carga (LIFTMOR)", p2Obj: "Estímulo Mecânico", p2Rat: "Lei de Wolff: o osso se densifica sob estresse.", p2A1: "Levantamento Terra e Agachamentos.", p2A2: "Colágeno se liga ao cálcio.",
+            p3Title: "Semanas 9 - 12", p3Subtitle: "Fase Anabólica", p3Obj: "Progressão", p3Rat: "Marcadores levam 8-12 semanas para indicar construção.", p3A1: "Manutenção estrita.", p3A2: "Aumento progressivo de carga.",
+            rGate: "O Guardião: Abre os receptores para absorção do cálcio. Requer gorduras.", rCalc: 'Policial do Trânsito: Cálcio (dureza), K2 direciona aos ossos.', rEnz: 'Reset Intestinal: Suporte enzimático para biodisponibilidade.', rColl: 'Armadura: Estrutura antirotura. Evitar tomar com cálcio.', rBlr: 'Lubrificante Sistêmico: Ácido hialurônico.', rMag: 'O Cofator: Sinergia com o cálcio para mineralização.', rFlo: 'Microbioma: Repara parede intestinal, desativa citocinas.',
+            nBreak: "No café da manhã com gorduras.", nCalc: "Máx 500mg por dose.", nMeal: "Na refeição principal.", nColl: "Longe das refeições. 2h do cálcio.", nBed: "Antes de dormir, estômago vazio.", noteWithCollagen: "Com Colágeno.", noteWithMagnesium: "Com Magnésio.",
+            p0m1Note: "1 sachê em 1.5L. Beber gradualmente.", p0m1Rat: "Hidrata e expele toxinas.", p0m2Note: "Ao acordar, com água.", p0m2Rat: "Poderoso antioxidante.", p0m3Note: "Com o café da manhã.", p0m3Rat: "Apoia o fígado.", p0m4Rat: "Quebra toxinas metabólicas.", p0s1Note: "Antes do jantar.", p0s1Rat: "Combate os radicais livres.", p0s2Note: "No jantar.", p0s2Rat: "Descongestiona o fígado à noite.", p0s3Rat: "Repovoamento do microbioma.",
+            w1Name: "Treino LIFTMOR", w1Dose: "2x / sem", w1Note: "Terra/Agachamentos.", w1Rat: "Força o depósito de cálcio.", w2Name: "Treino Anabólico", w2Dose: "+1-2 Kg", w2Note: "Aumentar peso.", w2Rat: "Sobrecarga progressiva mantém sinal anabólico."
+          },
+          pl: {
+            locale: 'pl-PL',
+            appTitle: "UNBREAKABLE", appSubtitle: "Suplementy",
+            day: "Dzień", completed: "Ukończono", today: "Dzisiaj", yesterday: "Wczoraj", tomorrow: "Jutro",
+            trackerTab: "Śledzenie", phasesTab: "Fazy", manualTab: "Info",
+            historyWarning: "Przeglądasz historię dla", backToToday: "Wróc do Dzisiaj",
+            greatJob: "Świetna robota!", completedAll: "Ukończyłeś dzisiejszy protokół. Twoje ciało Ci dziękuje.",
+            morning: "Rano (Śniadanie z tłuszczami)", midday: "W ciągu dnia (Z dala od posiłków)", evening: "Wieczór (Przed snem / Pusty żołądek)",
+            theWhy: 'Dlaczego?', startPhase: "Rozpocznij Fazę", inProgress: "W Trakcie", changePhaseWarning: "Na pewno chcesz zmienić fazę? Licznik dni zresetuje się do 1.",
+            phasesDesc: "Wybierz obecną fazę. Zmieniaj fazy tylko po ukończeniu zaplanowanych tygodni.",
+            yourPhases: "Twoje Fazy", currentPhaseLabel: "Obecna Faza", objectiveLabel: "Cel:",
+            startJourney: "Zacznij Podróż", startJourneyDesc: "Wybierz fazę protokołu, od której chcesz dziś zacząć.",
+            loading: "Inicjalizacja...",
+            navProtocol: "Protokół", navSupplements: "Suplementy", navDiet: "Dieta", navGym: "Siłownia", navManual: "Książka",
+            manualTitle: "Podręcznik Użytkownika", manualDesc: "Stworzony, aby maksymalizować Twoje rezultaty dzięki właściwej suplementacji.",
+            m1Title: "1. Codzienny Tracker", m1Desc: "Zaznaczaj suplementy. Pory dnia zapobiegają konkurencji wchłaniania.",
+            m2Title: "2. Fazy Protokołu", m2Desc: "Podczas zmiany fazy, tracker automatycznie aktualizuje suplementy.",
+            m3Title: "3. Naukowe Podstawy", m3Desc: "Kliknij ikonę 'i', aby poznać naukowe uzasadnienie.",
+            m4Title: "4. Historia Dni", m4Desc: "Użyj strzałek, by nawigować do poprzednich dni.",
+            p0Title: "Faza Wstępna (14 Dni)", p0Subtitle: "Detoks i Głęboki Drenaż", p0Obj: "Oczyszczanie wątroby i jelit.", p0Rat: "Zapalenie jelit utrudnia wchłanianie składników. Należy przygotować grunt.", p0A1: "Nawodnienie: 1,5l wody z Coral-Mine.", p0A2: "Detoks wątroby: Assimilator i Lecytyna.", p0A3: "Wsparcie antyoksydacyjne z H-500.",
+            p1Title: "Tygodnie 1 - 4", p1Subtitle: "Reset i Nasycenie", p1Obj: "Regulacja jelit i stawów", p1Rat: "Brak sensu na obciążenia mechaniczne, gdy bolą stawy.", p1A1: "Regularność w przyjmowaniu D3, Calci-Prime, Magnezu, Kolagenu.", p1A2: "Enzymy, probiotyki i B-Luron przeciwko stanom zapalnym.",
+            p2Title: "Tygodnie 5 - 8", p2Subtitle: "Faza Obciążenia (LIFTMOR)", p2Obj: "Bodziec Mechaniczny", p2Rat: "Prawo Wolffa: kości gęstnieją pod wpływem stresu mechanicznego.", p2A1: "Martwy Ciąg, Przysiady.", p2A2: "Kolagenowe rusztowanie wiąże wapń pod obciążeniem.",
+            p3Title: "Tygodnie 9 - 12", p3Subtitle: "Faza Anaboliczna", p3Obj: "Progresja i Markery", p3Rat: "Markery obrotu kostnego potrzebują 8-12 tygodni na zmianę.", p3A1: "Rygorystyczne utrzymanie suplementacji.", p3A2: "Stopniowe zwiększanie obciążeń treningowych.",
+            rGate: "Strażnik: Otwiera receptory jelitowe, by wchłonąć wapń. Wymaga tłuszczu.", rCalc: 'Kierujący Ruchem: Wapń roślinny, K2 by skierować do kości.', rEnz: 'Reset Jelitowy: Enzymy ułatwiające przyswajalność.', rColl: 'Stalowy Pancerz: Struktura anty-złamaniowa. Unikaj z wapniem.', rBlr: 'Smar Systemowy: Kwas hialuronowy i chondroityna.', rMag: 'Kofaktor: Synergia z wapniem, ułatwia mineralizację.', rFlo: 'Mikrobiom: Naprawia ścianę jelit, wygasza zapalenia.',
+            nBreak: "Do śniadania ze zdrowym tłuszczem.", nCalc: "Max 500mg na porcję.", nMeal: "Do głównego posiłku.", nColl: "Z dala od posiłków, 2h odstępu od wapnia.", nBed: "Przed snem, pusty żołądek.", noteWithCollagen: "Z Kolagenem.", noteWithMagnesium: "Z Magnezem.",
+            p0m1Note: "1 saszetka w 1.5L. Pić stopniowo.", p0m1Rat: "Nawadnia i wspomaga wydalanie toksyn.", p0m2Note: "Po przebudzeniu, popić wodą.", p0m2Rat: "Silny antyoksydant.", p0m3Note: "Ze śniadaniem.", p0m3Rat: "Wspiera funkcję wątroby.", p0m4Rat: "Rozkłada toksyny metaboliczne.", p0s1Note: "Przed kolacją.", p0s1Rat: "Wymiata wolne rodniki.", p0s2Note: "Podczas kolacji.", p0s2Rat: "Odciąża wątrobę nocą.", p0s3Rat: "Odbudowa zdrowego mikrobiomu.",
+            w1Name: "Trening LIFTMOR", w1Dose: "2x / tydz", w1Note: "Martwy Ciąg/Przysiady.", w1Rat: "Prawo Wolffa: wymusza odkładanie wapnia.", w2Name: "Trening Anaboliczny", w2Dose: "+1-2 Kg", w2Note: "Zwiększaj ciężar.", w2Rat: "Progresywne przeładowanie utrzymuje sygnał anaboliczny."
+          },
+          ja: {
+            locale: 'ja-JP',
+            appTitle: "UNBREAKABLE", appSubtitle: "サプリメント",
+            day: "日", completed: "完了", today: "今日", yesterday: "昨日", tomorrow: "明日",
+            trackerTab: "トラッカー", phasesTab: "フェーズ", manualTab: "情報",
+            historyWarning: "表示中の履歴:", backToToday: "今日に戻る",
+            greatJob: "素晴らしい！", completedAll: "本日の全プロトコルを完了しました。体も喜んでいます。",
+            morning: "朝 (脂質を含む朝食と)", midday: "日中 (食間)", evening: "夜 (就寝前/空腹時)",
+            theWhy: '理由', startPhase: "フェーズを開始", inProgress: "進行中", changePhaseWarning: "フェーズを変更しますか？日数のカウントが1からリセットされます。",
+            phasesDesc: "現在のフェーズを選択してください。予定の期間を完了した場合のみ変更してください。",
+            yourPhases: "あなたのフェーズ", currentPhaseLabel: "現在のフェーズ", objectiveLabel: "目標:",
+            startJourney: "旅を始める", startJourneyDesc: "今日から開始したいプロトコルのフェーズを選択してください。",
+            loading: "初期化中...",
+            navProtocol: "プロトコル", navSupplements: "サプリ", navDiet: "食事", navGym: "ジム", navManual: "ガイド",
+            manualTitle: "ユーザーマニュアル", manualDesc: "サプリメントを正しく摂取し、結果を最大化するためのアプリです。",
+            m1Title: "1. デイリートラッカー", m1Desc: "摂取したサプリにチェックを入れます。胃腸での吸収競合を避けるために時間が設定されています。",
+            m2Title: "2. フェーズ進行", m2Desc: "フェーズを変更すると、トラッカーが自動的にサプリを更新します。",
+            m3Title: "3. 科学的根拠", m3Desc: "各サプリの横にある「i」アイコンを押して理由を読んでください。",
+            m4Title: "4. 履歴", m4Desc: "矢印を使って過去の日付に移動し、飲み忘れを確認できます。",
+            p0Title: "準備フェーズ (14日間)", p0Subtitle: "デトックスとディープドレナージ", p0Obj: "肝臓、腸、細胞のクレンジング。", p0Rat: "腸の炎症は栄養素の吸収を妨げます。土台作りが必須です。", p0A1: "Coral-Mineを入れた1.5Lの水で水分補給。", p0A2: "AssimilatorとLecithinで肝臓デトックス。", p0A3: "H-500による抗酸化サポート。",
+            p1Title: "第1〜4週", p1Subtitle: "リセット & 飽和フェーズ", p1Obj: "腸の調整と関節のケア", p1Rat: "関節が痛む場合、機械的な負荷をかける意味はありません。", p1A1: "ビタミンD3、カルシウム、マグネシウム、コラーゲンの継続摂取。", p1A2: "酵素とプロバイオティクスによるケア。",
+            p2Title: "第5〜8週", p2Subtitle: "ローディングフェーズ (LIFTMOR)", p2Obj: "機械的刺激の導入", p2Rat: "ウォルフの法則：骨は高いストレス下で密度を増します。", p2A1: "デッドリフトとスクワット。", p2A2: "コラーゲンの足場がカルシウムと結合し始めます。",
+            p3Title: "第9〜12週", p3Subtitle: "アナボリックフェーズ", p3Obj: "進行と確認", p3Rat: "骨代謝マーカーの変化には8〜12週かかります。", p3A1: "栄養スタックの厳格な維持。", p3A2: "継続的なアナボリック信号のための負荷増加。",
+            rGate: "ゲートキーパー：カルシウム吸収のために腸内受容体を開きます。脂質が必要です。", rCalc: '交通整理：硬さのための植物性カルシウムと、骨へ導くK2。', rEnz: '腸内リセット：生体利用効率を高める酵素サポート。', rColl: '鋼の鎧：柔軟な構造。カルシウムとの同時摂取は避けてください。', rBlr: '生体力学的潤滑：ヒアルロン酸とコンドロイチン。', rMag: '忘れられた補酵素：カルシウムと相乗的に働き、骨基質をミネラル化。', rFlo: '腸内環境：腸壁を修復し、炎症を抑えます。',
+            nBreak: "健康的な脂質を含む朝食と一緒に。", nCalc: "1回につき最大500mg。", nMeal: "メインの食事と一緒に。", nColl: "食間。カルシウムから2時間空ける。", nBed: "就寝前、空腹時。", noteWithCollagen: "コラーゲンと一緒でOK。", noteWithMagnesium: "マグネシウムと一緒でOK。",
+            p0m1Note: "1.5Lに1包。少しずつ飲む。", p0m1Rat: "水分を補給し、毒素の排出を助けます。", p0m2Note: "起床時、水と一緒に。", p0m2Rat: "強力な抗酸化作用。", p0m3Note: "朝食と一緒に。", p0m3Rat: "肝機能をサポートします。", p0m4Rat: "代謝毒素を分解します。", p0s1Note: "夕食前。", p0s1Rat: "フリーラジカルの除去。", p0s2Note: "夕食と一緒に。", p0s2Rat: "夜間の肝臓の負担を減らします。", p0s3Rat: "健康な腸内フローラの再構築。",
+            w1Name: "LIFTMOR トレーニング", w1Dose: "週2回", w1Note: "デッドリフト / スクワット", w1Rat: "ウォルフの法則：カルシウムの沈着を促します。", w2Name: "アナボリックトレーニング", w2Dose: "+1-2 Kg", w2Note: "重量を増やす。", w2Rat: "プログレッシブオーバーロードがシグナルを維持します。"
+          }
+        };
+
+        const getPhasesData = (t) => [
+          { id: 'phase0', title: t.p0Title, subtitle: t.p0Subtitle, objective: t.p0Obj, rationale: t.p0Rat, actions: [t.p0A1, t.p0A2, t.p0A3] },
+          { id: 'phase1', title: t.p1Title, subtitle: t.p1Subtitle, objective: t.p1Obj, rationale: t.p1Rat, actions: [t.p1A1, t.p1A2] },
+          { id: 'phase2', title: t.p2Title, subtitle: t.p2Subtitle, objective: t.p2Obj, rationale: t.p2Rat, actions: [t.p2A1, t.p2A2] },
+          { id: 'phase3', title: t.p3Title, subtitle: t.p3Subtitle, objective: t.p3Obj, rationale: t.p3Rat, actions: [t.p3A1, t.p3A2] }
+        ];
+
+        const getProtocolsData = (lang) => {
+          const t = translations[lang] || translations.it;
+
+          const BASE_PROTOCOL_OSSEO = [
+            { id: 'm1', timeId: 'morning', name: 'D-Spray 2000', dose: '2.000 - 5.000 UI', note: t.nBreak, rationale: t.rGate },
+            { id: 'm2', timeId: 'morning', name: 'Calci-Prime', dose: '3-4 caps', note: t.nCalc, rationale: t.rCalc },
+            { id: 'm3', timeId: 'morning', name: 'Assimilator / Enzy-Prime', dose: '1 dose', note: t.nMeal, rationale: t.rEnz },
+            { id: 'p1', timeId: 'midday', name: 'Promarine Collagen', dose: '5 g', note: t.nColl, rationale: t.rColl },
+            { id: 'p2', timeId: 'midday', name: 'B-Luron', dose: '1 dose', note: t.noteWithCollagen, rationale: t.rBlr },
+            { id: 's1', timeId: 'evening', name: 'Coral Magnesium', dose: '300-400 mg', note: t.nBed, rationale: t.rMag },
+            { id: 's2', timeId: 'evening', name: 'Super-Flora', dose: '1 dose', note: t.noteWithMagnesium, rationale: t.rFlo }
+          ];
+
+          return {
+            phase0: [
+              { id: 'p0_m1', timeId: 'morning', name: 'Coral-Mine (Acqua)', dose: '1.5L', note: t.p0m1Note, rationale: t.p0m1Rat },
+              { id: 'p0_m2', timeId: 'morning', name: 'H-500', dose: '1 caps', note: t.p0m2Note, rationale: t.p0m2Rat },
+              { id: 'p0_m3', timeId: 'morning', name: 'Coral Lecithin', dose: '2 caps', note: t.p0m3Note, rationale: t.p0m3Rat },
+              { id: 'p0_m4', timeId: 'morning', name: 'Assimilator', dose: '1 caps', note: t.nMeal, rationale: t.p0m4Rat },
+              { id: 'p0_s1', timeId: 'evening', name: 'H-500', dose: '1 caps', note: t.p0s1Note, rationale: t.p0s1Rat },
+              { id: 'p0_s2', timeId: 'evening', name: 'Coral Lecithin', dose: '2 caps', note: t.p0s2Note, rationale: t.p0s2Rat },
+              { id: 'p0_s3', timeId: 'evening', name: 'Super-Flora', dose: '1 caps', note: t.nBed, rationale: t.p0s3Rat }
+            ],
+            phase1: BASE_PROTOCOL_OSSEO,
+            phase2: [
+              ...BASE_PROTOCOL_OSSEO,
+              { id: 'w1', timeId: 'midday', name: t.w1Name, dose: t.w1Dose, note: t.w1Note, rationale: t.w1Rat }
+            ],
+            phase3: [
+              ...BASE_PROTOCOL_OSSEO,
+              { id: 'w1', timeId: 'midday', name: t.w2Name, dose: t.w2Dose, note: t.w2Note, rationale: t.w2Rat }
+            ]
+          };
+        };
+
+        const getLocalTodayStr = () => {
+          const d = new Date();
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        const parseLocalDate = (dateStr) => {
+          const [y, m, d] = dateStr.split('-');
+          return new Date(y, m - 1, d);
+        };
+
+        const getRelativeDayName = (dateStr, todayStr, t) => {
+          if (dateStr === todayStr) return t.today;
+          const d = parseLocalDate(dateStr);
+          const tD = parseLocalDate(todayStr);
+          const diffTime = Math.round((tD - d) / (1000 * 60 * 60 * 24));
+          if (diffTime === 1) return t.yesterday;
+          if (diffTime === -1) return t.tomorrow;
+          return d.toLocaleDateString(t.locale, { day: '2-digit', month: 'short' });
+        };
+
+        const getDayNumber = (startStr, currentStr) => {
+          if (!startStr || !currentStr) return 1;
+          const start = parseLocalDate(startStr);
+          const current = parseLocalDate(currentStr);
+          const diffDays = Math.floor((current - start) / (1000 * 60 * 60 * 24));
+          return diffDays >= 0 ? diffDays + 1 : 1;
+        };
+
+        const changeDay = (dateStr, offset) => {
+          const d = parseLocalDate(dateStr);
+          d.setDate(d.getDate() + offset);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        function IconSun({ className }) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2m-7.07-7.07 1.41 1.41m12.72 12.72 1.41 1.41M2 12h2m16 0h2m-5.66 5.66-1.41 1.41M4.93 4.93 3.52 3.52" /></svg>; }
+        function IconMoon({ className }) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>; }
+        function IconSunMedium({ className }) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>; }
+
+        function SectionIcon({ iconType }) {
+          if (iconType === 'sun') return <IconSun className="w-5 h-5 text-amber-500" />;
+          if (iconType === 'sunMedium') return <IconSunMedium className="w-5 h-5 text-amber-500/80" />;
+          if (iconType === 'moon') return <IconMoon className="w-5 h-5 text-slate-400" />;
+          return null;
+        }
+
+        function CoralApp() {
+          const [user, setUser] = useState(null);
+          const [profile, setProfile] = useState(null); 
+          const [isLoading, setIsLoading] = useState(true);
+          const [activeTab, setActiveTab] = useState('tracker'); 
+          
+          const [lang, setLang] = useState(() => {
+            try {
+              if (typeof window !== 'undefined' && window.localStorage) {
+                return localStorage.getItem('osteo_lang') || 'it';
+              }
+            } catch(e) {}
+            return 'it';
+          });
+          
+          const [realToday, setRealToday] = useState(getLocalTodayStr());
+          const [selectedDate, setSelectedDate] = useState(getLocalTodayStr());
+          const [dailyProgress, setDailyProgress] = useState({});
+          const [expandedInfo, setExpandedInfo] = useState(null);
+          const [fallbackMode, setFallbackMode] = useState(!db);
+
+          const handleLangChange = (newLang) => {
+            setLang(newLang);
+            try {
+              if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.setItem('osteo_lang', newLang);
+              }
+            } catch(e) {}
+          };
+
+          const t = translations[lang] || translations.it;
+          const WEEKLY_PHASES = getPhasesData(t);
+          const DYNAMIC_PROTOCOLS = getProtocolsData(lang);
+
+          useEffect(() => {
+            if (!auth) { setFallbackMode(true); setIsLoading(false); return; }
+            const initAuth = async () => {
+              try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                  await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                  await signInAnonymously(auth);
+                }
+              } catch (e) { console.error("Auth error", e); setFallbackMode(true); }
+            };
+            initAuth();
+            const unsubscribeAuth = onAuthStateChanged(auth, setUser);
+            return () => unsubscribeAuth();
+          }, []);
+
+          useEffect(() => {
+            const midnightChecker = setInterval(() => {
+              const todayNow = getLocalTodayStr();
+              setRealToday(prev => {
+                if (prev !== todayNow) { setSelectedDate(todayNow); return todayNow; }
+                return prev;
+              });
+            }, 30000);
+            return () => clearInterval(midnightChecker);
+          }, []);
+
+          useEffect(() => {
+            if (fallbackMode) {
+              setProfile(prev => prev || { currentPhase: null, startDate: null, isNew: true });
+              setIsLoading(false);
+              return;
+            }
+            if (!user) return;
+            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid);
+            const unsub = onSnapshot(profileRef, (docSnap) => {
+              if (docSnap.exists()) { setProfile({ ...docSnap.data(), isNew: false }); } 
+              else { setProfile({ isNew: true }); }
+              setIsLoading(false);
+            }, (err) => { console.error(err); setFallbackMode(true); setIsLoading(false); });
+            return () => unsub();
+          }, [user, fallbackMode]);
+
+          useEffect(() => {
+            if (fallbackMode || !user || !profile || profile.isNew) { setDailyProgress({}); return; }
+            const logRef = doc(db, 'artifacts', appId, 'users', user.uid, 'logs', selectedDate);
+            const unsub = onSnapshot(logRef, (docSnap) => {
+              if (docSnap.exists()) { setDailyProgress(docSnap.data().tasks || {}); } 
+              else { setDailyProgress({}); }
+            }, (err) => console.error(err));
+            return () => unsub();
+          }, [user, profile, selectedDate, fallbackMode]);
+
+          const handleSelectPhase = async (phaseId) => {
+            const newStartDate = getLocalTodayStr();
+            if (fallbackMode) {
+              setProfile({ currentPhase: phaseId, startDate: newStartDate, isNew: false });
+              setRealToday(newStartDate);
+              setSelectedDate(newStartDate);
+              setActiveTab('tracker');
+              return;
+            }
+            if (!user) return;
+            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid);
+            await setDoc(profileRef, { currentPhase: phaseId, startDate: newStartDate });
+            setSelectedDate(newStartDate);
+            setRealToday(newStartDate);
+            setActiveTab('tracker');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          const toggleTask = async (taskId) => {
+            const newState = !dailyProgress[taskId];
+            const updatedProgress = { ...dailyProgress, [taskId]: newState };
+            setDailyProgress(updatedProgress);
+            if (fallbackMode || !user) return;
+            const logRef = doc(db, 'artifacts', appId, 'users', user.uid, 'logs', selectedDate);
+            try { await setDoc(logRef, { tasks: updatedProgress }, { merge: true }); } 
+            catch (e) { console.error("Save failed", e); }
+          };
+
+          if (isLoading) {
+            return (
+              <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+                <div className="w-10 h-10 border-4 border-slate-800 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+                <p className="text-slate-500 font-medium animate-pulse text-sm">{t.loading}</p>
+              </div>
+            );
+          }
+
+          const LanguageSelector = () => (
+            <div className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 transition-colors rounded-xl px-2 py-1.5 border border-slate-700 shadow-md">
+              <Globe className="w-4 h-4 text-amber-500" />
+              <select value={lang} onChange={(e) => handleLangChange(e.target.value)} className="bg-transparent text-xs font-bold text-slate-200 outline-none cursor-pointer appearance-none uppercase pr-1">
+                <option value="it" className="bg-slate-800 text-slate-200">IT</option>
+                <option value="en" className="bg-slate-800 text-slate-200">EN</option>
+                <option value="es" className="bg-slate-800 text-slate-200">ES</option>
+                <option value="fr" className="bg-slate-800 text-slate-200">FR</option>
+                <option value="de" className="bg-slate-800 text-slate-200">DE</option>
+                <option value="pt" className="bg-slate-800 text-slate-200">PT</option>
+                <option value="pl" className="bg-slate-800 text-slate-200">PL</option>
+                <option value="ja" className="bg-slate-800 text-slate-200">JA</option>
+              </select>
+            </div>
+          );
+
+          if (profile?.isNew) {
+            return (
+              <div className="min-h-screen bg-slate-950 font-sans pb-10 flex justify-center">
+                <div className="w-full max-w-md relative flex flex-col">
+                    <div className="absolute top-6 right-6 z-10"><LanguageSelector /></div>
+                    <div className="p-6 relative text-center pt-20">
+                      <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">{t.startJourney}</h1>
+                      <p className="text-slate-400 text-sm">{t.startJourneyDesc}</p>
+                    </div>
+                    <PhaseSelector onSelect={handleSelectPhase} currentPhaseId={null} phases={WEEKLY_PHASES} t={t} />
+                </div>
+              </div>
+            );
+          }
+
+          const safePhase = profile?.currentPhase || 'phase0';
+          const activeProtocol = DYNAMIC_PROTOCOLS[safePhase] || [];
+          const currentPhaseDetails = WEEKLY_PHASES.find(p => p.id === safePhase) || WEEKLY_PHASES[0];
+          
+          const dayNumber = getDayNumber(profile?.startDate, selectedDate);
+          const isToday = selectedDate === realToday;
+          
+          const totalTasks = activeProtocol.length;
+          const completedCount = activeProtocol.filter(task => dailyProgress[task.id]).length;
+          const progressPercentage = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+
+          const morningTasks = activeProtocol.filter(task => task.timeId === 'morning');
+          const middayTasks = activeProtocol.filter(task => task.timeId === 'midday');
+          const eveningTasks = activeProtocol.filter(task => task.timeId === 'evening');
+
+          return (
+            <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-amber-500/30 flex justify-center">
+              <div className="w-full max-w-md bg-slate-950 relative shadow-2xl overflow-x-hidden min-h-screen flex flex-col">
+                
+                <header className="pt-8 pb-4 px-6 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20">
+                  <div className="flex justify-between items-start mb-0">
+                    <div>
+                      <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-600 tracking-tighter uppercase">{t.appTitle}</h1>
+                      <p className="text-slate-400 text-sm font-medium tracking-widest uppercase mt-1">{t.appSubtitle}</p>
+                    </div>
+                    <LanguageSelector />
+                  </div>
+                </header>
+
+                <div className="px-6 pt-4 pb-2 z-10">
+                    <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-800 shadow-inner">
+                       {['tracker', 'phases', 'manual'].map((v) => (
+                         <button key={v} onClick={() => setActiveTab(v)} className={`flex-1 py-3 text-[11px] font-bold rounded-lg transition-all duration-300 uppercase ${activeTab === v ? 'bg-amber-500 text-slate-900 shadow-md shadow-amber-900/20' : 'text-slate-400 hover:text-slate-200'}`}>
+                            {t[v + 'Tab']}
+                         </button>
+                       ))}
+                    </div>
+                </div>
+
+                <main className="flex-1 pb-24">
+                  {}
+                  {activeTab === 'tracker' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      
+                      <div className="bg-slate-900 border border-slate-800 text-slate-200 shadow-inner mb-6 mx-6 rounded-xl flex items-center justify-between px-2 py-1.5">
+                          <button onClick={() => setSelectedDate(changeDay(selectedDate, -1))} className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 active:scale-95">
+                             <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <div className="text-sm font-medium flex items-center gap-2 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => setSelectedDate(realToday)}>
+                             {isToday && <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>}
+                             <span className={!isToday ? 'text-slate-400' : 'font-bold text-slate-200'}>{getRelativeDayName(selectedDate, realToday, t)}</span>
+                             <span className="text-slate-500 font-normal text-[10px]">({parseLocalDate(selectedDate).toLocaleDateString(t.locale, { day: '2-digit', month: '2-digit' })})</span>
+                          </div>
+                          <button onClick={() => setSelectedDate(changeDay(selectedDate, 1))} disabled={isToday} className={`p-2 rounded-lg transition-colors ${isToday ? 'text-slate-800 cursor-not-allowed' : 'hover:bg-slate-800 text-slate-400 active:scale-95'}`}>
+                             <ChevronRight className="w-5 h-5" />
+                          </button>
+                      </div>
+
+                      {!isToday && (
+                        <div className="mx-6 mb-6 bg-amber-950/40 border border-amber-900/50 rounded-xl p-4 flex flex-col gap-3 shadow-inner">
+                            <span className="text-xs text-amber-500 font-medium">{t.historyWarning} {parseLocalDate(selectedDate).toLocaleDateString(t.locale, { weekday: 'long', day: 'numeric', month: 'long' })}.</span>
+                            <button onClick={() => setSelectedDate(realToday)} className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[10px] uppercase tracking-wider font-bold px-3 py-2 rounded-lg border border-amber-500/30 transition-colors w-full">{t.backToToday}</button>
+                        </div>
+                      )}
+
+                      <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl mb-8 mx-6">
+                          <div className="flex justify-between items-center mb-3">
+                             <h3 className="font-bold text-slate-200 flex items-center gap-2">
+                                <Target className="w-5 h-5 text-amber-500"/>
+                                {currentPhaseDetails.subtitle}
+                             </h3>
+                             <span className="text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md border border-amber-500/20">{t.currentPhaseLabel}</span>
+                          </div>
+                          <div className="text-xs text-slate-400 space-y-2 mt-3 pt-3 border-t border-slate-800">
+                             <p><span className="font-semibold text-amber-500 uppercase tracking-wider text-[10px] block mb-1">{t.objectiveLabel}</span> {currentPhaseDetails.objective}</p>
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.day} {dayNumber}</span>
+                              <span className="text-xs font-bold text-amber-500">{progressPercentage}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-800 rounded-full mt-2 overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+                          </div>
+                      </div>
+
+                      <TaskSection title={t.morning} iconType="sun" tasks={morningTasks} dailyProgress={dailyProgress} toggleTask={toggleTask} expandedInfo={expandedInfo} setExpandedInfo={setExpandedInfo} t={t} />
+                      <TaskSection title={t.midday} iconType="sunMedium" tasks={middayTasks} dailyProgress={dailyProgress} toggleTask={toggleTask} expandedInfo={expandedInfo} setExpandedInfo={setExpandedInfo} t={t} />
+                      <TaskSection title={t.evening} iconType="moon" tasks={eveningTasks} dailyProgress={dailyProgress} toggleTask={toggleTask} expandedInfo={expandedInfo} setExpandedInfo={setExpandedInfo} t={t} />
+                      
+                      {progressPercentage === 100 && isToday && (
+                        <div className="mx-6 mb-8 bg-emerald-950/30 border border-emerald-900/50 text-emerald-400 p-6 rounded-2xl text-center shadow-inner animate-in zoom-in duration-500">
+                          <span className="text-4xl block mb-3">🏆</span>
+                          <h3 className="font-black text-xl mb-1">{t.greatJob}</h3>
+                          <p className="text-sm font-medium opacity-80">{t.completedAll}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {}
+                  {activeTab === 'phases' && (
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                      <div className="px-6 mb-6">
+                         <h2 className="text-xl font-bold text-white mb-2">{t.yourPhases}</h2>
+                         <p className="text-xs text-slate-400 leading-relaxed">{t.phasesDesc}</p>
+                      </div>
+                      <PhaseSelector onSelect={handleSelectPhase} currentPhaseId={safePhase} phases={WEEKLY_PHASES} t={t} />
+                    </div>
+                  )}
+
+                  {activeTab === 'manual' && (
+                    <div className="px-6 pb-8 space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 text-center shadow-xl">
+                            <BookOpen className="w-10 h-10 mx-auto mb-3 text-amber-500" />
+                            <h2 className="text-xl font-bold text-white mb-2">{t.manualTitle}</h2>
+                            <p className="text-xs text-slate-400 leading-relaxed">{t.manualDesc}</p>
+                        </div>
+                        <div className="space-y-4">
+                           <ManualSection title={t.m1Title} desc={t.m1Desc} />
+                           <ManualSection title={t.m2Title} desc={t.m2Desc} />
+                           <ManualSection title={t.m3Title} desc={t.m3Desc} />
+                           <ManualSection title={t.m4Title} desc={t.m4Desc} />
+                        </div>
+                    </div>
+                  )}
+                </main>
+
+                <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+                  <div className="flex justify-around items-center px-2">
+                    <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
+                      <Activity className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navProtocol}</span>
+                    </a>
+                    
+                    <button className="flex flex-col items-center gap-1.5 transition-colors text-amber-500 scale-110 cursor-default">
+                      <Pill className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navSupplements}</span>
+                    </button>
+
+                    <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
+                      <Utensils className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navDiet}</span>
+                    </a>
+                    <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
+                      <Dumbbell className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navGym}</span>
+                    </a>
+                    <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
+                      <BookOpen className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navManual}</span>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          );
+        }
+
+        function ManualSection({ title, desc }) {
+          return (
+            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-inner">
+              <h3 className="text-sm font-bold text-amber-500 mb-2">{title}</h3>
+              <p className="text-xs text-slate-300 leading-relaxed">{desc}</p>
+            </div>
+          );
+        }
+
+        function TaskSection({ title, iconType, tasks, dailyProgress, toggleTask, expandedInfo, setExpandedInfo, t }) {
+          if (!tasks || tasks.length === 0) return null;
+          return (
+            <section className="mb-6 px-6">
+              <div className="flex items-center gap-2 mb-3">
+                <SectionIcon iconType={iconType} />
+                <h2 className="text-sm font-bold text-slate-200 uppercase tracking-tight">{title}</h2>
+              </div>
+              <div className="space-y-3">
+                {tasks.map(task => (
+                  <TaskRow key={task.id} task={task} checked={!!dailyProgress[task.id]} onToggle={() => toggleTask(task.id)} isExpanded={expandedInfo === task.id} onToggleInfo={() => setExpandedInfo(expandedInfo === task.id ? null : task.id)} t={t} />
+                ))}
+              </div>
+            </section>
+          );
+        }
+
+        function TaskRow({ task, checked, onToggle, isExpanded, onToggleInfo, t }) {
+          const isWorkout = task.id.startsWith('w');
+          return (
+            <div className={`w-full text-left rounded-2xl p-4 border transition-all duration-300 ${checked ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-slate-900/50 border-slate-800 hover:border-slate-600'}`}>
+              <div className="flex items-start gap-4">
+                <button onClick={onToggle} className={`mt-0.5 flex-shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors shadow-sm active:scale-90 ${checked ? 'bg-emerald-500 border-emerald-500 text-slate-950 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : isWorkout ? 'border-amber-500/50 text-transparent' : 'border-slate-600 text-transparent'}`}>
+                  {checked && <Check className="w-4 h-4 text-slate-950" strokeWidth={3} />}
+                </button>
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={onToggle}>
+                  <div className="flex flex-col mb-1">
+                    <h3 className={`font-bold text-sm transition-colors ${checked ? 'text-slate-500 line-through' : isWorkout ? 'text-amber-500' : 'text-slate-200'}`}>{task.name}</h3>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md inline-block mt-1.5 w-max tracking-wider ${checked ? 'bg-slate-800 text-slate-500' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>{task.dose}</span>
+                  </div>
+                  <p className={`text-xs mt-1.5 leading-relaxed ${checked ? 'text-slate-600' : 'text-slate-400'}`}>{task.note}</p>
+                </div>
+                
+                {/* Contenitore Pulsanti Azione (Info / Carrello) */}
+                <div className="flex flex-col gap-2">
+                  {!isWorkout && (
+                    <a href={getShopLink(task.name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-shrink-0 p-1.5 rounded-full transition-colors active:scale-90 text-slate-400 bg-slate-800 hover:text-emerald-400 flex items-center justify-center shadow-sm border border-slate-700 hover:border-emerald-500/30">
+                        <ShoppingCart className="w-4 h-4" />
+                    </a>
+                  )}
+                  <button onClick={(e) => { e.stopPropagation(); onToggleInfo(); }} className={`flex-shrink-0 p-1.5 rounded-full transition-colors active:scale-90 ${isExpanded ? 'bg-amber-500 text-slate-950 shadow-[0_0_10px_rgba(245,158,11,0.4)]' : 'text-slate-400 bg-slate-800 hover:text-amber-500 shadow-sm border border-slate-700 hover:border-amber-500/30'}`}>
+                    <Info className="w-4 h-4" />
+                  </button>
+                </div>
+
+              </div>
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
+                <div className="bg-slate-950/50 rounded-xl p-3 border border-slate-800 shadow-inner">
+                  <h4 className="text-[10px] font-black uppercase text-amber-500 tracking-widest mb-1.5">{t.theWhy}</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">{task.rationale}</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        function PhaseSelector({ onSelect, currentPhaseId, phases, t }) {
+          const [confirmId, setConfirmId] = useState(null);
+
+          return (
+            <div className="space-y-4 px-6 pb-8">
+              {phases.map(phase => {
+                const isActive = phase.id === currentPhaseId;
+                return (
+                  <div key={phase.id} className={`bg-slate-900 border rounded-2xl p-5 shadow-xl transition-all ${isActive ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-slate-800'}`}>
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md shadow-sm border ${isActive ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>{phase.title}</span>
+                        <h3 className="text-xl font-black text-slate-200 mt-3 tracking-tight">{phase.subtitle}</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-300 mb-2"><span className="uppercase text-[10px] font-bold tracking-wider text-amber-500 mr-2">{t.objectiveLabel}</span>{phase.objective}</p>
+                    <p className="text-xs text-slate-400 italic border-l-2 border-slate-700 pl-3 mb-4">{phase.rationale}</p>
+                    <ul className="space-y-2 mb-5">
+                      {phase.actions.map((act, i) => (
+                        <li key={i} className="text-xs text-slate-300 flex items-start gap-2">
+                          <span className="text-amber-500">•</span> <span>{act}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {isActive ? (
+                      <div className="w-full text-center bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold py-2 rounded-lg uppercase tracking-wider">{t.inProgress}</div>
+                    ) : confirmId === phase.id ? (
+                      <div className="flex gap-2 w-full animate-in fade-in duration-300">
+                        <button onClick={() => setConfirmId(null)} className="flex-1 bg-slate-800 text-slate-300 text-xs font-bold py-2 rounded-lg transition-colors border border-slate-700 active:scale-95">Annulla</button>
+                        <button onClick={() => { onSelect(phase.id); setConfirmId(null); }} className="flex-1 bg-amber-500 text-slate-950 text-xs font-bold py-2 rounded-lg transition-colors border border-amber-500 active:scale-95">Conferma Fase</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => { if (!currentPhaseId) { onSelect(phase.id); } else { setConfirmId(phase.id); } }} className="w-full bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-xs font-bold py-2 rounded-lg transition-colors shadow-md uppercase tracking-wider border border-slate-700 hover:border-amber-500 active:scale-95">{t.startPhase}</button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<CoralApp />);
+    </script>
+</body>
+</html>ewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UNBREAKABLE - Supplements</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="importmap">
