@@ -10,10 +10,7 @@
             "imports": {
                 "react": "https://esm.sh/react@18.2.0",
                 "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-                "lucide-react": "https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0",
-                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-                "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
-                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+                "lucide-react": "https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0"
             }
         }
     </script>
@@ -31,22 +28,6 @@
         import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
         import { Activity, Dumbbell, Utensils, BookOpen, Pill, ChevronDown, Check, Info, Target, Globe, ChevronLeft, ChevronRight, ShoppingCart, ListChecks } from 'lucide-react';
-        import { initializeApp } from 'firebase/app';
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
-
-        let app, auth, db, appId;
-        try {
-          const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-          if (firebaseConfig) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-          }
-        } catch (error) {
-          console.error("Firebase init error:", error);
-        }
 
         const getProductSlug = (name) => {
           if (name.includes('Coral-Mine')) return 'coral-mine';
@@ -230,11 +211,11 @@
             navProtocol: "Protocolo", navSupplements: "Suplementos", navDiet: "Dieta", navGym: "Academia", navManual: "O Guia",
             goBack: "Voltar",
             manualTitle: "Manual do Usuário", manualDesc: "Criado para maximizar seus resultados com a ingestão correta.",
-            m1Title: "1. O Rastreador Diário", m1Desc: "Marque os suplementos tomados. Os horários evitam a competição gástrica.",
+            m1Title: "1. O Rastreador Diário", m1Desc: "Marque os suplementos tomados. Os horários evitan a competição gástrica.",
             m2Title: "2. Fases do Protocolo", m2Desc: "O rastreador atualiza os suplementos automaticamente ao mudar de fase.",
             m3Title: "3. Justificativa Científica", m3Desc: "Leia o 'Porquê' no ícone 'i' de cada suplemento.",
             m4Title: "4. Histórico", m4Desc: "Navegue para os dias anteriores.",
-            p0Title: "Fase Preliminar (14 Dias)", p0Subtitle: "Detox e Drenagem", p0Obj: "Limpeza do fígado e intestino.", p0Rat: "Um intestino inflamado não absorve nutrientes.", p0A1: "Hidratação com 1.5L e Coral-Mine.", p0A2: "Detox hepático com Assimilator e Lecithin.", p0A3: "Apoio antioxidante (H-500).",
+            p0Title: "Fase Preliminar (14 Dias)", p0Subtitle: "Detox e Drenagem", p0Obj: "Limpeza do fígado e intestino.", p0Rat: "Um intestino inflamado não absorbe nutrientes.", p0A1: "Hidratação com 1.5L e Coral-Mine.", p0A2: "Detox hepático com Assimilator e Lecithin.", p0A3: "Apoio antioxidante (H-500).",
             p1Title: "Semanas 1 - 4", p1Subtitle: "Fase de Reset", p1Obj: "Alinhamento Intestinal e Articular", p1Rat: "Não faz sentido aplicar carga se as articulações doem.", p1A1: "D3, Calci-Prime, Magnésio e Colágeno regulares.", p1A2: "Enzimas e B-Luron para inflamação silente.",
             p2Title: "Semanas 5 - 8", p2Subtitle: "Fase de Carga (LIFTMOR)", p2Obj: "Estímulo Mecânico", p2Rat: "Lei de Wolff: o osso se densifica sob estresse.", p2A1: "Levantamento Terra e Agachamentos.", p2A2: "Colágeno se liga ao cálcio.",
             p3Title: "Semanas 9 - 12", p3Subtitle: "Fase Anabólica", p3Obj: "Progressão", p3Rat: "Marcadores levam 8-12 semanas para indicar construção.", p3A1: "Manutenção estrita.", p3A2: "Aumento progressivo de carga.",
@@ -247,7 +228,7 @@
             locale: 'pl-PL',
             appTitle: "UNBREAKABLE", appSubtitle: "Suplementy",
             day: "Dzień", completed: "Ukończono", today: "Dzisiaj", yesterday: "Wczoraj", tomorrow: "Jutro",
-            trackerTab: "Śledzenie", phasesTab: "Fazy", manualTab: "Info",
+            trackerTab: "Śledzenie", phasesTab: "Fases", manualTab: "Info",
             historyWarning: "Przeglądasz historię dla", backToToday: "Wróc do Dzisiaj",
             greatJob: "Świetna robota!", completedAll: "Ukończyłeś dzisiejszy protokół. Twoje ciało Ci dziękuje.",
             morning: "Rano (Śniadanie z tłuszczami)", midday: "W ciągu dnia (Z dala od posiłków)", evening: "Wieczór (Przed snem / Pusty żołądek)",
@@ -435,7 +416,6 @@
         );
 
         function CoralApp() {
-          const [user, setUser] = useState(null);
           const [profile, setProfile] = useState(null); 
           const [isLoading, setIsLoading] = useState(true);
           const [activeTab, setActiveTab] = useState('tracker'); 
@@ -453,7 +433,6 @@
           const [selectedDate, setSelectedDate] = useState(getLocalTodayStr());
           const [dailyProgress, setDailyProgress] = useState({});
           const [expandedInfo, setExpandedInfo] = useState(null);
-          const [fallbackMode, setFallbackMode] = useState(!db);
 
           const handleLangChange = (newLang) => {
             setLang(newLang);
@@ -468,22 +447,7 @@
           const WEEKLY_PHASES = getPhasesData(t);
           const DYNAMIC_PROTOCOLS = getProtocolsData(lang);
 
-          useEffect(() => {
-            if (!auth) { setFallbackMode(true); setIsLoading(false); return; }
-            const initAuth = async () => {
-              try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                  await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                  await signInAnonymously(auth);
-                }
-              } catch (e) { console.error("Auth error", e); setFallbackMode(true); }
-            };
-            initAuth();
-            const unsubscribeAuth = onAuthStateChanged(auth, setUser);
-            return () => unsubscribeAuth();
-          }, []);
-
+          // Midnight checker
           useEffect(() => {
             const midnightChecker = setInterval(() => {
               const todayNow = getLocalTodayStr();
@@ -495,58 +459,59 @@
             return () => clearInterval(midnightChecker);
           }, []);
 
+          // Load Profile from LocalStorage
           useEffect(() => {
-            if (fallbackMode) {
-              setProfile(prev => prev || { currentPhase: null, startDate: null, isNew: true });
-              setIsLoading(false);
-              return;
+            try {
+              const savedProfile = localStorage.getItem('unbreakable_profile');
+              if (savedProfile) {
+                setProfile({ ...JSON.parse(savedProfile), isNew: false });
+              } else {
+                setProfile({ isNew: true });
+              }
+            } catch(e) { 
+              setProfile({ isNew: true }); 
             }
-            if (!user) return;
-            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid);
-            const unsub = onSnapshot(profileRef, (docSnap) => {
-              if (docSnap.exists()) { setProfile({ ...docSnap.data(), isNew: false }); } 
-              else { setProfile({ isNew: true }); }
-              setIsLoading(false);
-            }, (err) => { console.error(err); setFallbackMode(true); setIsLoading(false); });
-            return () => unsub();
-          }, [user, fallbackMode]);
+            setIsLoading(false);
+          }, []);
 
+          // Load Daily Progress from LocalStorage whenever selectedDate changes
           useEffect(() => {
-            if (fallbackMode || !user || !profile || profile.isNew) { setDailyProgress({}); return; }
-            const logRef = doc(db, 'artifacts', appId, 'users', user.uid, 'logs', selectedDate);
-            const unsub = onSnapshot(logRef, (docSnap) => {
-              if (docSnap.exists()) { setDailyProgress(docSnap.data().tasks || {}); } 
-              else { setDailyProgress({}); }
-            }, (err) => console.error(err));
-            return () => unsub();
-          }, [user, profile, selectedDate, fallbackMode]);
+            if (!profile || profile.isNew) { 
+              setDailyProgress({}); 
+              return; 
+            }
+            try {
+              const savedProg = localStorage.getItem(`unbreakable_prog_${selectedDate}`);
+              setDailyProgress(savedProg ? JSON.parse(savedProg) : {});
+            } catch(e) { 
+              setDailyProgress({}); 
+            }
+          }, [profile, selectedDate]);
 
-          const handleSelectPhase = async (phaseId) => {
+          const handleSelectPhase = (phaseId) => {
             const newStartDate = getLocalTodayStr();
-            if (fallbackMode) {
-              setProfile({ currentPhase: phaseId, startDate: newStartDate, isNew: false });
-              setRealToday(newStartDate);
-              setSelectedDate(newStartDate);
-              setActiveTab('tracker');
-              return;
-            }
-            if (!user) return;
-            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid);
-            await setDoc(profileRef, { currentPhase: phaseId, startDate: newStartDate });
-            setSelectedDate(newStartDate);
+            const newProfile = { currentPhase: phaseId, startDate: newStartDate, isNew: false };
+            setProfile(newProfile);
+            try { 
+              localStorage.setItem('unbreakable_profile', JSON.stringify(newProfile)); 
+            } catch(e) {}
+            
             setRealToday(newStartDate);
+            setSelectedDate(newStartDate);
             setActiveTab('tracker');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           };
 
-          const toggleTask = async (taskId) => {
+          const toggleTask = (taskId) => {
             const newState = !dailyProgress[taskId];
             const updatedProgress = { ...dailyProgress, [taskId]: newState };
             setDailyProgress(updatedProgress);
-            if (fallbackMode || !user) return;
-            const logRef = doc(db, 'artifacts', appId, 'users', user.uid, 'logs', selectedDate);
-            try { await setDoc(logRef, { tasks: updatedProgress }, { merge: true }); } 
-            catch (e) { console.error("Save failed", e); }
+            
+            try { 
+              localStorage.setItem(`unbreakable_prog_${selectedDate}`, JSON.stringify(updatedProgress)); 
+            } catch(e) { 
+              console.error("Save to localStorage failed", e); 
+            }
           };
 
           if (isLoading) {
@@ -571,7 +536,6 @@
                     </div>
                     <PhaseSelector onSelect={handleSelectPhase} currentPhaseId={null} phases={WEEKLY_PHASES} t={t} />
                     
-                    {/* Bottom Back Button updated here */}
                     <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-4 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                       <div className="flex justify-center items-center">
                         <a href="index.html" className="flex items-center gap-2 transition-all duration-300 text-slate-400 hover:text-amber-500 hover:bg-slate-900 px-6 py-3 rounded-xl border border-transparent hover:border-amber-500/30 active:scale-95 cursor-pointer no-underline">
@@ -683,7 +647,6 @@
                     </div>
                   )}
 
-                  {}
                   {activeTab === 'phases' && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                       <div className="px-6 mb-6">
@@ -694,7 +657,6 @@
                     </div>
                   )}
 
-                  {}
                   {activeTab === 'manual' && (
                     <div className="px-6 pb-8 space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                         <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 text-center shadow-xl">
