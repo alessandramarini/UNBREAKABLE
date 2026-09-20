@@ -30,7 +30,6 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect } from 'react';
         import { createRoot } from 'react-dom/client';
-        // Aggiunto ShoppingCart e ListChecks alle icone
         import { Activity, Dumbbell, Utensils, BookOpen, Pill, ChevronDown, Check, Info, Target, Globe, ChevronLeft, ChevronRight, ShoppingCart, ListChecks } from 'lucide-react';
         import { initializeApp } from 'firebase/app';
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
@@ -49,7 +48,6 @@
           console.error("Firebase init error:", error);
         }
 
-        // Funzione per mappare il nome del prodotto all'URL esatto del catalogo
         const getProductSlug = (name) => {
           if (name.includes('Coral-Mine')) return 'coral-mine';
           if (name.includes('H-500')) return 'h-500';
@@ -62,11 +60,9 @@
           if (name.includes('Collagen')) return 'promarine-collagen-tripeptides-pack';
           if (name.includes('Calci-Prime')) return 'calci-prime';
           if (name.includes('D-Spray')) return 'd-spray-2000';
-          // Fallback dinamico in caso di prodotti non mappati
           return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         };
 
-        // Genera il link con il REF_CODE
         const getShopLink = (name) => {
           const slug = getProductSlug(name);
           return `https://coral.club/shop/${slug}.html?REF_CODE=224934821522`;
@@ -177,7 +173,7 @@
             m3Title: "3. Raisonnement Scientifique", m3Desc: "Lisez le 'Pourquoi' derrière chaque supplément.",
             m4Title: "4. Historique", m4Desc: "Naviguez dans le passé pour vérifier les oublis.",
             p0Title: "Phase Préliminaire (14 Jours)", p0Subtitle: "Détox et Drainage", p0Obj: "Nettoyage du foie et des intestins.", p0Rat: "Un intestin enflammé n'absorbe pas les nutriments.", p0A1: "Hydratation avec 1,5L et Coral-Mine.", p0A2: "Détox avec Assimilator et Lecithin.", p0A3: "Soutien antioxydant H-500.",
-            p1Title: "Semaines 1 - 4", p1Subtitle: "Phase de Réinitialisation", p1Obj: "Alignement Intestinal et Articulaire", p1Rat: "Aucun sens d'appliquer une charge si les articulations font mal.", p1A1: "Régularité : D3, Calcium, Magnésium, Collagène.", p1A2: "Enzymes et probiotiques contre l'inflammation.",
+            p1Title: "Semaines 1 - 4", p1Subtitle: "Phase de Réinitialisation", p1Obj: "Alignement Intestinal et Articular", p1Rat: "Aucun sens d'appliquer une charge si les articulations font mal.", p1A1: "Régularité : D3, Calcium, Magnésium, Collagène.", p1A2: "Enzymes et probiotiques contre l'inflammation.",
             p2Title: "Semaines 5 - 8", p2Subtitle: "Phase de Charge (LIFTMOR)", p2Obj: "Introduction du Stimulus Mécanique", p2Rat: "Loi de Wolff : l'os se densifie sous la contrainte.", p2A1: "Soulevé de terre, Squats.", p2A2: "L'échafaudage de collagène se lie au calcium.",
             p3Title: "Semaines 9 - 12", p3Subtitle: "Phase Anabolique", p3Obj: "Progression et Vérification", p3Rat: "Les marqueurs prennent 8-12 semaines pour montrer la construction.", p3A1: "Maintien strict.", p3A2: "Augmentation des charges.",
             rGate: "Le Gardien : Ouvre les récepteurs pour l'absorption du calcium. Nécessite des graisses.", rCalc: 'Le Policier : Calcium végétal pour la dureté, K2 pour la direction.', rEnz: 'Reset Intestinal : Soutien enzymatique pour la biodisponibilité.', rColl: 'Armure d\'Acier : Structure anti-casse. Éviter avec le calcium.', rBlr: 'Lubrifiant Biomécanique : Acide hyaluronique.', rMag: 'Le Cofacteur : Synergise avec le calcium pour minéraliser.', rFlo: 'Microbiome : Répare la paroi intestinale, éteint l\'inflammation.',
@@ -237,7 +233,7 @@
             p2Title: "Semanas 5 - 8", p2Subtitle: "Fase de Carga (LIFTMOR)", p2Obj: "Estímulo Mecânico", p2Rat: "Lei de Wolff: o osso se densifica sob estresse.", p2A1: "Levantamento Terra e Agachamentos.", p2A2: "Colágeno se liga ao cálcio.",
             p3Title: "Semanas 9 - 12", p3Subtitle: "Fase Anabólica", p3Obj: "Progressão", p3Rat: "Marcadores levam 8-12 semanas para indicar construção.", p3A1: "Manutenção estrita.", p3A2: "Aumento progressivo de carga.",
             rGate: "O Guardião: Abre os receptores para absorção do cálcio. Requer gorduras.", rCalc: 'Policial do Trânsito: Cálcio (dureza), K2 direciona aos ossos.', rEnz: 'Reset Intestinal: Suporte enzimático para biodisponibilidade.', rColl: 'Armadura: Estrutura antirotura. Evitar tomar com cálcio.', rBlr: 'Lubrificante Sistêmico: Ácido hialurônico.', rMag: 'O Cofator: Sinergia com o cálcio para mineralização.', rFlo: 'Microbioma: Repara parede intestinal, desativa citocinas.',
-            nBreak: "No café da manhã com gorduras.", nCalc: "Máx 500mg por dose.", nMeal: "Na refeição principal.", nColl: "Longe das refeições. 2h do cálcio.", nBed: "Antes de dormir, estômago vazio.", noteWithCollagen: "Com Colágeno.", noteWithMagnesium: "Com Magnésio.",
+            nBreak: "No café da manhã com gorduras.", nCalc: "Máx 500mg por dose.", nMeal: "Na refeição principal.", nColl: "Longe das refeições. 2h do cálcio.", nBed: "Antes de dormir, estômago vazio.", noteWithCollagen: "Com Colágeno.", noteWithMagnesium: "Com Magnésium.",
             p0m1Note: "1 sachê em 1.5L. Beber gradualmente.", p0m1Rat: "Hidrata e expele toxinas.", p0m2Note: "Ao acordar, com água.", p0m2Rat: "Poderoso antioxidante.", p0m3Note: "Com o café da manhã.", p0m3Rat: "Apoia o fígado.", p0m4Rat: "Quebra toxinas metabólicas.", p0s1Note: "Antes do jantar.", p0s1Rat: "Combate os radicais livres.", p0s2Note: "No jantar.", p0s2Rat: "Descongestiona o fígado à noite.", p0s3Rat: "Repovoamento do microbioma.",
             w1Name: "Treino LIFTMOR", w1Dose: "2x / sem", w1Note: "Terra/Agachamentos.", w1Rat: "Força o depósito de cálcio.", w2Name: "Treino Anabólico", w2Dose: "+1-2 Kg", w2Note: "Aumentar peso.", w2Rat: "Sobrecarga progressiva mantém sinal anabólico."
           },
@@ -392,6 +388,44 @@
           return null;
         }
 
+        const LANGUAGES = [
+          { code: 'en', flag: 'gb' },
+          { code: 'it', flag: 'it' },
+          { code: 'fr', flag: 'fr' },
+          { code: 'de', flag: 'de' },
+          { code: 'es', flag: 'es' },
+          { code: 'pt', flag: 'pt' },
+          { code: 'pl', flag: 'pl' },
+          { code: 'ja', flag: 'jp' }
+        ];
+
+        const LanguageSelector = ({ currentLang, onLangChange }) => (
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide py-3 px-1 w-full justify-start md:justify-center">
+            {LANGUAGES.map((l) => {
+              const isSelected = currentLang === l.code;
+              return (
+                <button
+                  key={l.code}
+                  onClick={() => onLangChange(l.code)}
+                  className={`relative flex-shrink-0 transition-all duration-300 rounded-[4px] outline-none cursor-pointer
+                    ${isSelected 
+                      ? 'ring-[2.5px] ring-amber-500 ring-offset-[3px] ring-offset-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.7)] scale-[1.15] z-10 opacity-100' 
+                      : 'opacity-40 hover:opacity-100 hover:scale-110'
+                    }`}
+                >
+                  <img
+                    src={`https://flagcdn.com/w40/${l.flag}.png`}
+                    srcSet={`https://flagcdn.com/w80/${l.flag}.png 2x`}
+                    className="w-[28px] h-[20px] object-cover rounded-[2px] block"
+                    alt={l.code}
+                    loading="lazy"
+                  />
+                </button>
+              );
+            })}
+          </div>
+        );
+
         function CoralApp() {
           const [user, setUser] = useState(null);
           const [profile, setProfile] = useState(null); 
@@ -516,34 +550,19 @@
             );
           }
 
-          const LanguageSelector = () => (
-            <div className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 transition-colors rounded-xl px-2 py-1.5 border border-slate-700 shadow-md">
-              <Globe className="w-4 h-4 text-amber-500" />
-              <select value={lang} onChange={(e) => handleLangChange(e.target.value)} className="bg-transparent text-xs font-bold text-slate-200 outline-none cursor-pointer appearance-none uppercase pr-1">
-                <option value="it" className="bg-slate-800 text-slate-200">IT</option>
-                <option value="en" className="bg-slate-800 text-slate-200">EN</option>
-                <option value="es" className="bg-slate-800 text-slate-200">ES</option>
-                <option value="fr" className="bg-slate-800 text-slate-200">FR</option>
-                <option value="de" className="bg-slate-800 text-slate-200">DE</option>
-                <option value="pt" className="bg-slate-800 text-slate-200">PT</option>
-                <option value="pl" className="bg-slate-800 text-slate-200">PL</option>
-                <option value="ja" className="bg-slate-800 text-slate-200">JA</option>
-              </select>
-            </div>
-          );
-
           if (profile?.isNew) {
             return (
               <div className="min-h-screen bg-slate-950 font-sans flex justify-center">
-                <div className="w-full max-w-md relative flex flex-col pb-24">
-                    <div className="absolute top-6 right-6 z-10"><LanguageSelector /></div>
-                    <div className="p-6 relative text-center pt-20">
+                <div className="w-full max-w-md relative flex flex-col pb-24 overflow-x-hidden">
+                    <div className="pt-8 px-2 flex justify-center z-10 w-full">
+                        <LanguageSelector currentLang={lang} onLangChange={handleLangChange} />
+                    </div>
+                    <div className="p-6 relative text-center pt-8">
                       <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">{t.startJourney}</h1>
                       <p className="text-slate-400 text-sm">{t.startJourneyDesc}</p>
                     </div>
                     <PhaseSelector onSelect={handleSelectPhase} currentPhaseId={null} phases={WEEKLY_PHASES} t={t} />
                     
-                    {/* Menu Fisso in basso anche sulla schermata iniziale */}
                     <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                       <div className="flex justify-around items-center px-2">
                         <button className="flex flex-col items-center gap-1.5 transition-colors text-amber-500 scale-110 cursor-default">
@@ -587,13 +606,13 @@
             <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-amber-500/30 flex justify-center">
               <div className="w-full max-w-md bg-slate-950 relative shadow-2xl overflow-x-hidden min-h-screen flex flex-col">
                 
-                <header className="pt-8 pb-4 px-6 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20">
-                  <div className="flex justify-between items-start mb-0">
-                    <div>
-                      <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-600 tracking-tighter uppercase">{t.appTitle}</h1>
-                      <p className="text-slate-400 text-sm font-medium tracking-widest uppercase mt-1">{t.appSubtitle}</p>
-                    </div>
-                    <LanguageSelector />
+                <header className="pt-6 pb-2 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-amber-900/30 sticky top-0 z-20 flex flex-col gap-1">
+                  <div className="px-6">
+                    <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-600 tracking-tighter uppercase leading-none">{t.appTitle}</h1>
+                    <p className="text-slate-400 text-xs font-medium tracking-widest uppercase mt-1">{t.appSubtitle}</p>
+                  </div>
+                  <div className="px-4">
+                    <LanguageSelector currentLang={lang} onLangChange={handleLangChange} />
                   </div>
                 </header>
 
@@ -608,7 +627,6 @@
                 </div>
 
                 <main className="flex-1 pb-24">
-                  {}
                   {activeTab === 'tracker' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                       
@@ -667,7 +685,6 @@
                     </div>
                   )}
 
-                  {}
                   {activeTab === 'phases' && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                       <div className="px-6 mb-6">
@@ -697,32 +714,21 @@
 
                 <div className="fixed bottom-0 w-full max-w-md mx-auto bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-3 pb-safe z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
                   <div className="flex justify-around items-center px-2">
-                    
-                    {/* Protocollo (Attivo in questa pagina) */}
                     <button className="flex flex-col items-center gap-1.5 transition-colors text-amber-500 scale-110 cursor-default">
                       <ListChecks className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navProtocol}</span>
                     </button>
-                    
-                    {/* Shop (Link Esterno) */}
                     <a href="https://coral.club/?REF_CODE=224934821522" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <ShoppingCart className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">Shop</span>
                     </a>
-
-                    {/* Dieta (Riporta a index.html) */}
                     <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <Utensils className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navDiet}</span>
                     </a>
-                    
-                    {/* Palestra (Riporta a index.html) */}
                     <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <Dumbbell className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navGym}</span>
                     </a>
-                    
-                    {/* Il Libro (Riporta a index.html) */}
                     <a href="index.html" className="flex flex-col items-center gap-1.5 transition-colors text-slate-500 hover:text-slate-400 no-underline cursor-pointer">
                       <BookOpen className="h-5 w-5" /><span className="text-[9px] font-bold tracking-wider uppercase">{t.navManual}</span>
                     </a>
-
                   </div>
                 </div>
 
@@ -773,7 +779,6 @@
                   <p className={`text-xs mt-1.5 leading-relaxed ${checked ? 'text-slate-600' : 'text-slate-400'}`}>{task.note}</p>
                 </div>
                 
-                {/* Contenitore Pulsanti Azione (Info / Carrello) */}
                 <div className="flex flex-col gap-2">
                   {!isWorkout && (
                     <a href={getShopLink(task.name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-shrink-0 p-1.5 rounded-full transition-colors active:scale-90 text-slate-400 bg-slate-800 hover:text-emerald-400 flex items-center justify-center shadow-sm border border-slate-700 hover:border-emerald-500/30">
@@ -784,7 +789,6 @@
                     <Info className="w-4 h-4" />
                   </button>
                 </div>
-
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
                 <div className="bg-slate-950/50 rounded-xl p-3 border border-slate-800 shadow-inner">
