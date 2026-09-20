@@ -284,6 +284,8 @@ function TaskSection({ title, iconType, tasks, dailyProgress, toggleTask, expand
 }
 
 function PhaseSelector({ onSelect, currentPhaseId, phases, t }) {
+  const [confirmId, setConfirmId] = useState(null);
+
   return (
     <div className="space-y-4 px-6 pb-8">
       {phases.map(phase => {
@@ -307,8 +309,16 @@ function PhaseSelector({ onSelect, currentPhaseId, phases, t }) {
             </ul>
             {isActive ? (
               <div className="w-full text-center bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-bold py-2 rounded-lg uppercase tracking-wider">{t.inProgress}</div>
+            ) : confirmId === phase.id ? (
+              <div className="flex flex-col gap-2">
+                 <p className="text-[10px] text-amber-500 text-center font-bold">{t.changePhaseWarning}</p>
+                 <div className="flex gap-2">
+                   <button onClick={() => { setConfirmId(null); onSelect(phase.id); }} className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold py-2 rounded-lg transition-colors shadow-md uppercase tracking-wider">Ok</button>
+                   <button onClick={() => setConfirmId(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2 rounded-lg transition-colors shadow-md uppercase tracking-wider border border-slate-700">X</button>
+                 </div>
+              </div>
             ) : (
-              <button onClick={() => { if (!currentPhaseId || window.confirm(t.changePhaseWarning)) onSelect(phase.id); }} className="w-full bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-xs font-bold py-2 rounded-lg transition-colors shadow-md uppercase tracking-wider border border-slate-700 hover:border-amber-500 active:scale-95">{t.startPhase}</button>
+              <button onClick={() => { if (!currentPhaseId) onSelect(phase.id); else setConfirmId(phase.id); }} className="w-full bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-xs font-bold py-2 rounded-lg transition-colors shadow-md uppercase tracking-wider border border-slate-700 hover:border-amber-500 active:scale-95">{t.startPhase}</button>
             )}
           </div>
         )
@@ -323,7 +333,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('tracker'); 
   const [lang, setLang] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('osteo_lang') || 'it';
+    try {
+      if (typeof window !== 'undefined') return localStorage.getItem('osteo_lang') || 'it';
+    } catch (e) {
+      console.warn("localStorage access denied, using default lang.");
+    }
     return 'it';
   });
   
@@ -335,7 +349,11 @@ export default function App() {
 
   const handleLangChange = (newLang) => {
     setLang(newLang);
-    if (typeof window !== 'undefined') localStorage.setItem('osteo_lang', newLang);
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem('osteo_lang', newLang);
+    } catch (e) {
+      console.warn("localStorage access denied, language won't be saved.");
+    }
   };
 
   const t = translations[lang] || translations.it;
